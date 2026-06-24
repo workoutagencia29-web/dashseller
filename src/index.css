@@ -1,0 +1,225 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ---- Light theme ---- */
+    --background: 244 246 249; /* #F4F6F9 */
+    --sidebar: 255 255 255; /* #FFFFFF */
+    --card: 255 255 255; /* #FFFFFF */
+    --card-muted: 247 249 251; /* #F7F9FB */
+    --border: 228 232 238; /* #E4E8EE */
+    --input: 241 244 248; /* #F1F4F8 */
+    --foreground: 17 24 39; /* #111827 */
+    --muted: 107 119 140; /* #6B778C */
+    --faint: 156 167 185; /* #9CA7B9 */
+    --primary: 47 107 255; /* #2F6BFF royal blue */
+    --primary-foreground: 255 255 255;
+    --positive: 47 107 255; /* #2F6BFF */
+    --negative: 220 38 38; /* #DC2626 */
+  }
+
+  .dark {
+    /* ---- Dark theme — paleta da marca (esquema "Mais azulado") ---- */
+    --background: 12 23 48; /* #0C1730 — fundo do painel */
+    --sidebar: 9 16 32; /* #091020 — navy bem escuro */
+    --card: 13 27 57; /* #0D1B39 — cards (tom do hero glow) */
+    --card-muted: 22 40 80; /* #162850 — hover/insets, leve lift do card */
+    --border: 34 52 90; /* #22345A — linhas/contornos */
+    --input: 22 40 80; /* #162850 */
+    --foreground: 246 249 252; /* #F6F9FC — branco levemente frio */
+    --muted: 142 154 177; /* #8E9AB1 */
+    --faint: 104 117 142; /* #68758E */
+    --primary: 47 107 255; /* #2F6BFF vivid blue */
+    --primary-foreground: 255 255 255;
+    --positive: 47 107 255; /* #2F6BFF */
+    --negative: 248 113 113; /* #F87171 */
+  }
+
+  * {
+    border-color: rgb(var(--border));
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  /* Theme-aware Recharts styling */
+  .chart-themed .recharts-cartesian-grid line {
+    stroke: rgb(var(--border));
+  }
+  .chart-themed .recharts-text,
+  .chart-themed .recharts-cartesian-axis-tick-value {
+    fill: rgb(var(--faint));
+  }
+  .chart-themed .recharts-surface:focus,
+  .chart-themed .recharts-wrapper:focus {
+    outline: none;
+  }
+
+  /* react-day-picker — tema azul/dark (filtro "Período personalizado") */
+  .rdp-root {
+    --rdp-accent-color: rgb(var(--primary));
+    --rdp-accent-background-color: rgb(var(--primary) / 0.15);
+    --rdp-today-color: rgb(var(--primary));
+    --rdp-day-width: 36px;
+    --rdp-day-height: 36px;
+    --rdp-day_button-width: 34px;
+    --rdp-day_button-height: 34px;
+    --rdp-day_button-border-radius: 9px;
+    --rdp-selected-border: none;
+    --rdp-range_start-color: #fff;
+    --rdp-range_end-color: #fff;
+    --rdp-range_middle-background-color: rgb(var(--primary) / 0.14);
+    --rdp-range_middle-color: rgb(var(--foreground));
+    --rdp-disabled-opacity: 0.3;
+    --rdp-nav_button-height: 30px;
+    --rdp-nav_button-width: 30px;
+    margin: 0;
+    font-size: 13px;
+    color: rgb(var(--foreground));
+  }
+  .rdp-month_caption {
+    font-weight: 600;
+    color: rgb(var(--foreground));
+    text-transform: capitalize;
+  }
+  .rdp-weekday {
+    color: rgb(var(--faint));
+    font-weight: 500;
+    font-size: 11px;
+  }
+  .rdp-day_button {
+    color: rgb(var(--foreground));
+  }
+  .rdp-day_button:hover {
+    background-color: rgb(var(--card-muted));
+  }
+  .rdp-chevron {
+    fill: rgb(var(--muted));
+  }
+  .rdp-button_previous:hover .rdp-chevron,
+  .rdp-button_next:hover .rdp-chevron {
+    fill: rgb(var(--foreground));
+  }
+  .rdp-today:not(.rdp-selected) .rdp-day_button {
+    color: rgb(var(--primary));
+    font-weight: 700;
+  }
+  .rdp-outside {
+    opacity: 0.45;
+  }
+
+  /* Botão de logout flutuante — animação de expandir no hover
+     (HTML/CSS enviado pelo Pedro; só troquei o vermelho pelo azul do projeto via --primary
+     e namespaceei as classes .Btn/.sign/.text -> .logout-btn ...) */
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition-duration: 0.3s;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.199);
+    background-color: rgb(var(--primary));
+  }
+  .logout-btn .sign {
+    width: 100%;
+    transition-duration: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logout-btn .sign svg {
+    width: 15px;
+  }
+  .logout-btn .sign svg path {
+    fill: white;
+  }
+  .logout-btn .text {
+    position: absolute;
+    right: 0%;
+    width: 0%;
+    opacity: 0;
+    color: white;
+    font-size: 0.8em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    transition-duration: 0.3s;
+  }
+  .logout-btn:hover {
+    width: 110px;
+    border-radius: 40px;
+    transition-duration: 0.3s;
+  }
+  .logout-btn:hover .sign {
+    width: 30%;
+    transition-duration: 0.3s;
+    padding-left: 16px;
+  }
+  .logout-btn:hover .text {
+    opacity: 1;
+    width: 70%;
+    transition-duration: 0.3s;
+    padding-right: 10px;
+  }
+  .logout-btn:active {
+    transform: translate(2px, 2px);
+  }
+}
+
+@layer utilities {
+  /* Thin, themed scrollbars */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--border)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--border));
+    border-radius: 9999px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Fade na troca de página (rota) — evita a "troca seca" */
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.page-fade {
+  animation: page-fade 0.35s ease-out;
+}
