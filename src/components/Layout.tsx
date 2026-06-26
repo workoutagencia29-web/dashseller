@@ -17,6 +17,9 @@ export function Layout() {
   // Na página de Configurações a sidebar principal some — fica só o índice da própria página.
   const focusedSettings = pathname === '/configuracoes' || pathname.startsWith('/configuracoes/')
 
+  // A tela de Logs preenche a altura e NÃO rola (layout travado em viewport).
+  const isLogs = pathname === '/equipe/logs'
+
   // Chave por seção (1º segmento da URL) — troca de seção dispara o fade; trocar de sub-aba não.
   const section = '/' + (pathname.split('/')[1] ?? '')
 
@@ -32,9 +35,10 @@ export function Layout() {
 
       <main
         className={cn(
-          'scrollbar-thin relative flex-1 overflow-y-auto',
-          // trava o bounce/overscroll (rubber-band) só na tela de Configurações
-          focusedSettings && 'overscroll-none',
+          // overscroll-none trava o bounce/rubber-band (não "pula" nem mostra espaço vazio) em todas as páginas
+          'scrollbar-thin relative flex-1 overscroll-none',
+          // Logs preenche a altura e não rola; demais páginas rolam normalmente
+          isLogs ? 'overflow-hidden' : 'overflow-y-auto',
         )}
       >
         {/* Botão de logout — fica no topo da página e some ao rolar (escondido na tela focada de Configurações) */}
@@ -46,8 +50,12 @@ export function Layout() {
         <div
           key={section}
           className={cn(
-            'page-fade px-5 py-6 sm:px-8 sm:py-8',
+            'page-fade px-5 sm:px-8',
+            // Logs usa padding vertical menor para os 5 registros caberem sem scroll
+            isLogs ? 'py-5' : 'py-6 sm:py-8',
             focusedSettings ? 'w-full' : 'mx-auto max-w-[1320px]',
+            // na tela de Logs o conteúdo vira coluna que preenche a altura (sem scroll)
+            isLogs && 'flex h-full min-h-0 flex-col',
           )}
         >
           <Outlet context={{ onOpenMobile: () => setMobileOpen(true) } as LayoutContext} />

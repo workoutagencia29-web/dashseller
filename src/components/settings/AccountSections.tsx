@@ -6,14 +6,10 @@ import {
   Star,
   Trash2,
   Send,
-  RefreshCw,
-  Eye,
   CheckCircle2,
-  XCircle,
   UserPlus,
   Check,
   X,
-  Bell,
   Wallet,
   AlertTriangle,
   Mails,
@@ -38,7 +34,6 @@ import {
   bankAccounts as initialBankAccounts,
   type BankAccount,
   webhookEvents,
-  webhookHistory,
   teamMembers as initialMembers,
   roles,
   permissions,
@@ -294,7 +289,6 @@ export function BankSection() {
 export function WebhooksSection() {
   const [active, setActive] = useState(true)
   const [selected, setSelected] = useState<string[]>(['payment.approved', 'balance.settled'])
-  const [headers, setHeaders] = useState([{ key: 'Authorization', value: 'Bearer ••••••' }])
 
   function toggleEvent(ev: string) {
     setSelected((s) => (s.includes(ev) ? s.filter((e) => e !== ev) : [...s, ev]))
@@ -327,77 +321,23 @@ export function WebhooksSection() {
         <SubBlock title="Eventos">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {webhookEvents.map((ev) => {
-              const on = selected.includes(ev)
+              const on = selected.includes(ev.id)
               return (
                 <button
-                  key={ev}
-                  onClick={() => toggleEvent(ev)}
+                  key={ev.id}
+                  onClick={() => toggleEvent(ev.id)}
                   className={cn(
-                    'flex items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 text-left font-mono text-[13px] transition-colors',
+                    'flex items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 text-left text-sm font-medium transition-colors',
                     on ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted hover:bg-card-muted/50',
                   )}
                 >
-                  {ev}
+                  {ev.label}
                   <span className={cn('flex h-4 w-4 items-center justify-center rounded border', on ? 'border-primary bg-primary text-primary-foreground' : 'border-border')}>
                     {on && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 </button>
               )
             })}
-          </div>
-        </SubBlock>
-
-        <SubBlock title="Cabeçalhos customizados">
-          <div className="space-y-2">
-            {headers.map((h, i) => (
-              <div key={i} className="flex gap-2">
-                <Input value={h.key} onChange={(e) => setHeaders((hs) => hs.map((x, xi) => (xi === i ? { ...x, key: e.target.value } : x)))} placeholder="Header" className="flex-1" />
-                <Input value={h.value} onChange={(e) => setHeaders((hs) => hs.map((x, xi) => (xi === i ? { ...x, value: e.target.value } : x)))} placeholder="Valor" className="flex-1" />
-                <Button variant="ghost" size="sm" onClick={() => setHeaders((hs) => hs.filter((_, xi) => xi !== i))} aria-label="Remover cabeçalho">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => setHeaders((hs) => [...hs, { key: '', value: '' }])}>
-              <Plus className="h-4 w-4" /> Adicionar cabeçalho
-            </Button>
-          </div>
-        </SubBlock>
-
-        <SubBlock title="Histórico de disparos">
-          <div className="scrollbar-thin overflow-x-auto">
-            <table className="w-full min-w-[560px] text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
-                  <th className="py-2.5 pr-3 font-semibold">Evento</th>
-                  <th className="px-3 py-2.5 font-semibold">HTTP</th>
-                  <th className="px-3 py-2.5 font-semibold">Quando</th>
-                  <th className="py-2.5 pl-3 text-right font-semibold">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {webhookHistory.map((d) => (
-                  <tr key={d.id} className="border-b border-border/60 last:border-0">
-                    <td className="py-3 pr-3 font-mono text-[13px] text-foreground">{d.event}</td>
-                    <td className="px-3 py-3">
-                      <span className={cn('inline-flex items-center gap-1 text-xs font-semibold', d.success ? 'text-positive' : 'text-negative')}>
-                        {d.success ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
-                        {d.httpStatus}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3 text-muted">{d.timestamp}</td>
-                    <td className="py-3 pl-3">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="sm" aria-label="Ver payload"><Eye className="h-4 w-4" /></Button>
-                        {!d.success && (
-                          <Button variant="ghost" size="sm" aria-label="Reenviar"><RefreshCw className="h-4 w-4" /></Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </SubBlock>
       </div>
@@ -524,7 +464,7 @@ export function AccountNotificationsSection() {
 
   return (
     <SettingsCard id="notif-conta" title="Notificações da Conta" description="Alertas operacionais e financeiros do seller.">
-      <div className="divide-y divide-border">
+      <div className="-mb-3 divide-y divide-border">
         <ToggleRow
           icon={<Wallet className="h-5 w-5" />}
           label="Alerta de saldo baixo"
@@ -548,11 +488,6 @@ export function AccountNotificationsSection() {
           checked={dispute}
           onChange={setDispute}
         />
-      </div>
-
-      <div className="mt-5 flex items-center gap-2 rounded-xl bg-card-muted/40 px-3.5 py-2.5 text-xs text-muted">
-        <Bell className="h-4 w-4" />
-        Esses alertas seguem os canais definidos em Notificações Pessoais.
       </div>
     </SettingsCard>
   )

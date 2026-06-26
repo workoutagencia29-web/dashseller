@@ -15,8 +15,20 @@ import { LinkPagamentoTab } from './components/financeiro/LinkPagamentoTab'
 import { ContestacoesTab } from './components/financeiro/ContestacoesTab'
 import { TaxasTab } from './components/financeiro/TaxasTab'
 import Webhooks from './pages/Webhooks'
+import ConvidarColaborador from './pages/ConvidarColaborador'
+import Permissoes from './pages/Permissoes'
+import Logs from './pages/Logs'
+import Colaboradores from './pages/Colaboradores'
 import { Placeholder } from './pages/Placeholder'
 import { navItems } from './data/mockData'
+
+/** Sub-rotas com página própria — não geram placeholder automático. */
+const EXPLICIT_CHILD_PATHS = new Set([
+  '/equipe/convidar-colaborador',
+  '/equipe/colaboradores',
+  '/equipe/permissoes',
+  '/equipe/logs',
+])
 
 export default function App() {
   return (
@@ -46,17 +58,25 @@ export default function App() {
         {/* Integrações — Webhooks (movido das Configurações) */}
         <Route path="/integracoes/webhooks" element={<Webhooks />} />
 
+        {/* Equipe — páginas reais */}
+        <Route path="/equipe/convidar-colaborador" element={<ConvidarColaborador />} />
+        <Route path="/equipe/colaboradores" element={<Colaboradores />} />
+        <Route path="/equipe/permissoes" element={<Permissoes />} />
+        <Route path="/equipe/logs" element={<Logs />} />
+
         {/* Telas em construção — geradas a partir do menu */}
         {navItems.flatMap((item) => {
           if (item.label === 'Relatório' || item.label === 'Financeiro' || item.label === 'Integrações') return []
           if (item.children) {
-            return item.children.map((child) => (
-              <Route
-                key={child.path}
-                path={child.path}
-                element={<Placeholder title={child.label} />}
-              />
-            ))
+            return item.children
+              .filter((child) => !EXPLICIT_CHILD_PATHS.has(child.path))
+              .map((child) => (
+                <Route
+                  key={child.path}
+                  path={child.path}
+                  element={<Placeholder title={child.label} />}
+                />
+              ))
           }
           if (item.path && item.path !== '/') {
             return [

@@ -193,7 +193,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
         )}
 
         {/* Nav */}
-        <nav className="scrollbar-thin flex-1 space-y-1 overflow-y-auto px-3 py-2">
+        <nav className="scrollbar-thin flex-1 space-y-1 overflow-y-auto overscroll-none px-3 py-2">
           {navItems.map(renderItem)}
         </nav>
 

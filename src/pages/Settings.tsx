@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { User, ShieldCheck, Bell, Building2, Landmark, Users, BellRing, ArrowLeft } from 'lucide-react'
+import { User, ShieldCheck, Bell, Building2, Landmark, BellRing, ArrowLeft } from 'lucide-react'
 import { cn } from '../lib/utils'
 import {
   ProfileSection,
@@ -10,7 +10,6 @@ import {
 import {
   CompanySection,
   BankSection,
-  TeamSection,
   AccountNotificationsSection,
 } from '../components/settings/AccountSections'
 
@@ -28,7 +27,6 @@ const NAV = [
     items: [
       { id: 'empresa', label: 'Empresa', icon: Building2 },
       { id: 'bancario', label: 'Dados Bancários', icon: Landmark },
-      { id: 'equipe', label: 'Equipe', icon: Users },
       { id: 'notif-conta', label: 'Notificações da Conta', icon: BellRing },
     ],
   },
@@ -66,7 +64,7 @@ export default function Settings() {
           {/* título dentro do rail */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-[26px]">Configurações</h1>
-            <p className="mt-1 text-sm text-muted">Gerencie seu perfil e a conta do seller.</p>
+            <p className="mt-1 text-sm text-muted">Gerencie sua conta.</p>
           </div>
 
           {/* índice */}
@@ -118,7 +116,6 @@ export default function Settings() {
         <PersonalNotificationsSection />
         <CompanySection />
         <BankSection />
-        <TeamSection />
         <AccountNotificationsSection />
       </div>
     </div>

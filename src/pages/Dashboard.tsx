@@ -11,7 +11,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <Header title="Olá, Pristia" subtitle="Este é o seu resumo de hoje" onOpenMobile={onOpenMobile} />
+      <Header title="Olá, Pristia" subtitle="Gestão da sua conta" onOpenMobile={onOpenMobile} />
 
       <div className="space-y-6">
         {/* Linha 1: stats + desempenho no mesmo card */}

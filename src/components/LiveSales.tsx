@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import { entradas, clients, type Entrada } from '../data/reportsData'
 import { formatCurrency, cn } from '../lib/utils'
 import { Avatar } from './ui/Avatar'
@@ -9,7 +10,12 @@ interface FeedItem {
   key: number
   entrada: Entrada
   ts: number
+  /** Marcada quando está saindo do feed (anima e some); removida do estado depois. */
+  leaving?: boolean
 }
+
+const MAX_VISIBLE = 3
+const EXIT_MS = 500
 
 let counter = 0
 
@@ -20,29 +26,58 @@ function relTime(ts: number, now: number): string {
   return `há ${Math.floor(s / 60)}min`
 }
 
+/**
+ * Relógio relativo isolado: tem o próprio ticker de 1s, então atualizar o
+ * tempo NÃO re-renderiza a lista (o que interromperia as animações de saída
+ * do AnimatePresence e deixaria nós órfãos no feed).
+ */
+function RelTime({ ts }: { ts: number }) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [])
+  return <>{relTime(ts, now)}</>
+}
+
 export function LiveSales({ className }: { className?: string }) {
   const approved = useMemo(() => entradas.filter((e) => e.status === 'Aprovado'), [])
   const clientById = useMemo(() => Object.fromEntries(clients.map((c) => [c.id, c])), [])
   const pickRef = useRef(0)
 
   const [feed, setFeed] = useState<FeedItem[]>(() =>
-    approved.slice(0, 3).map((e, i) => ({ key: counter++, entrada: e, ts: Date.now() - i * 11000 })),
+    approved.slice(0, MAX_VISIBLE).map((e, i) => ({ key: counter++, entrada: e, ts: Date.now() - i * 11000 })),
   )
-  const [now, setNow] = useState(Date.now())
   const [selected, setSelected] = useState<Entrada | null>(null)
 
   useEffect(() => {
+    const timeouts: ReturnType<typeof setTimeout>[] = []
     const add = setInterval(() => {
       // próxima venda (pseudo-aleatória, sem repetir a anterior)
       let i = pickRef.current
       i = (i + 1 + Math.floor(Math.random() * (approved.length - 1))) % approved.length
       pickRef.current = i
-      setFeed((f) => [{ key: counter++, entrada: approved[i], ts: Date.now() }, ...f].slice(0, 3))
+
+      setFeed((f) => {
+        // marca a venda visível mais antiga como "saindo" (ela anima e some)
+        const visible = f.filter((x) => !x.leaving)
+        const next = f.map((x) => x)
+        if (visible.length >= MAX_VISIBLE) {
+          const oldest = visible[visible.length - 1]
+          const idx = next.findIndex((x) => x.key === oldest.key)
+          next[idx] = { ...oldest, leaving: true }
+        }
+        return [{ key: counter++, entrada: approved[i], ts: Date.now() }, ...next]
+      })
+
+      // remove do DOM as que terminaram de sair
+      timeouts.push(
+        setTimeout(() => setFeed((f) => f.filter((x) => !x.leaving)), EXIT_MS),
+      )
     }, 4000)
-    const tick = setInterval(() => setNow(Date.now()), 1000)
     return () => {
       clearInterval(add)
-      clearInterval(tick)
+      timeouts.forEach(clearTimeout)
     }
   }, [approved])
 
@@ -64,15 +99,26 @@ export function LiveSales({ className }: { className?: string }) {
       </div>
 
       {/* feed */}
-      <div className="scrollbar-thin mt-5 min-h-0 flex-1 space-y-2.5 overflow-y-auto pr-1">
+      <div className="scrollbar-thin mt-5 flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto pr-1">
         {feed.map((item) => {
           const e = item.entrada
           const c = clientById[e.clientId]
           return (
-            <button
+            <motion.button
               key={item.key}
-              onClick={() => setSelected(e)}
-              className="flex w-full animate-fade-in items-center gap-3 rounded-2xl border border-border bg-card-muted/30 p-3 text-left transition-colors hover:border-primary/40 hover:bg-card-muted/50"
+              layout
+              initial={{ opacity: 0, y: -14, scale: 0.97 }}
+              animate={
+                item.leaving
+                  ? { opacity: 0, y: 16, scale: 0.97 }
+                  : { opacity: 1, y: 0, scale: 1 }
+              }
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              onClick={() => !item.leaving && setSelected(e)}
+              className={cn(
+                'flex w-full items-center gap-3 rounded-2xl border border-border bg-card-muted/30 p-3 text-left transition-colors hover:border-primary/40 hover:bg-card-muted/50',
+                item.leaving && 'pointer-events-none',
+              )}
             >
               <Avatar name={c.name} seed={c.avatarSeed} size={40} />
               <div className="min-w-0 flex-1">
@@ -86,9 +132,9 @@ export function LiveSales({ className }: { className?: string }) {
               </div>
               <div className="shrink-0 text-right">
                 <p className="text-sm font-bold text-foreground">{formatCurrency(e.value)}</p>
-                <p className="text-xs text-muted">{relTime(item.ts, now)}</p>
+                <p className="text-xs text-muted"><RelTime ts={item.ts} /></p>
               </div>
-            </button>
+            </motion.button>
           )
         })}
       </div>

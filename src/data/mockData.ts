@@ -66,6 +66,7 @@ export const navItems: NavItem[] = [
     label: 'Equipe',
     icon: Users,
     children: [
+      { label: 'Convidar Colaborador', path: '/equipe/convidar-colaborador' },
       { label: 'Colaboradores', path: '/equipe/colaboradores' },
       { label: 'Logs', path: '/equipe/logs' },
       { label: 'Permissões', path: '/equipe/permissoes' },

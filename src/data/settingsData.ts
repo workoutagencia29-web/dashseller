@@ -59,11 +59,12 @@ export interface WebhookDelivery {
 }
 
 export const webhookEvents = [
-  'payment.approved',
-  'payment.refused',
-  'payment.refunded',
-  'chargeback.opened',
-  'balance.settled',
+  { id: 'payment.approved', label: 'Pagamento Aprovado' },
+  { id: 'payment.refused', label: 'Pagamento Recusado' },
+  { id: 'payment.refunded', label: 'Pagamento Reembolsado' },
+  { id: 'balance.settled', label: 'Pagamento Pendente' },
+  { id: 'chargeback.opened', label: 'Chargeback em Aberto' },
+  { id: 'withdrawal.completed', label: 'Saque Efetuado' },
 ]
 
 export const webhookHistory: WebhookDelivery[] = [
