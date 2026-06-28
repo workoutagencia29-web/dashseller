@@ -4,6 +4,7 @@ import { StatsPanel } from '../components/StatsPanel'
 import { TeamPerformanceChart } from '../components/TeamPerformanceChart'
 import { LiveSales } from '../components/LiveSales'
 import { TotalEmployeeDonut } from '../components/TotalEmployeeDonut'
+import { SaldoDisponivelCard } from '../components/SaldoDisponivelCard'
 import type { LayoutContext } from '../components/Layout'
 
 export default function Dashboard() {
@@ -11,7 +12,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <Header title="Olá, Pristia" subtitle="Gestão da sua conta" onOpenMobile={onOpenMobile} />
+      <Header title="Olá, Pedro" subtitle="Gestão da sua conta" onOpenMobile={onOpenMobile} />
 
       <div className="space-y-6">
         {/* Linha 1: stats + desempenho no mesmo card */}
@@ -28,10 +29,9 @@ export default function Dashboard() {
 
         {/* Linha 2: (card vazio + vendas ao vivo) | donut */}
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)]">
-          {/* coluna esquerda: card vazio em cima + vendas ao vivo (menor) embaixo */}
+          {/* coluna esquerda: saldo disponível em cima + vendas ao vivo (menor) embaixo */}
           <div className="flex flex-col gap-6">
-            {/* card vazio — placeholder pra conteúdo futuro */}
-            <div className="h-[360px] shrink-0 rounded-3xl border border-border bg-card" />
+            <SaldoDisponivelCard className="h-[360px] shrink-0" />
             <LiveSales className="h-[328px]" />
           </div>
           {/* coluna direita: donut (mais alto, ocupa a altura toda) */}

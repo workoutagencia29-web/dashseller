@@ -2,14 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { entradas, clients, type Entrada } from '../data/reportsData'
 import { formatCurrency, cn } from '../lib/utils'
-import { Avatar } from './ui/Avatar'
 import { Badge } from './settings/primitives'
 import { EntradaDrawer } from './reports/EntradaDrawer'
 
 interface FeedItem {
   key: number
   entrada: Entrada
-  ts: number
   /** Marcada quando está saindo do feed (anima e some); removida do estado depois. */
   leaving?: boolean
 }
@@ -19,34 +17,13 @@ const EXIT_MS = 500
 
 let counter = 0
 
-function relTime(ts: number, now: number): string {
-  const s = Math.max(0, Math.floor((now - ts) / 1000))
-  if (s < 3) return 'agora'
-  if (s < 60) return `há ${s}s`
-  return `há ${Math.floor(s / 60)}min`
-}
-
-/**
- * Relógio relativo isolado: tem o próprio ticker de 1s, então atualizar o
- * tempo NÃO re-renderiza a lista (o que interromperia as animações de saída
- * do AnimatePresence e deixaria nós órfãos no feed).
- */
-function RelTime({ ts }: { ts: number }) {
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(t)
-  }, [])
-  return <>{relTime(ts, now)}</>
-}
-
 export function LiveSales({ className }: { className?: string }) {
   const approved = useMemo(() => entradas.filter((e) => e.status === 'Aprovado'), [])
   const clientById = useMemo(() => Object.fromEntries(clients.map((c) => [c.id, c])), [])
   const pickRef = useRef(0)
 
   const [feed, setFeed] = useState<FeedItem[]>(() =>
-    approved.slice(0, MAX_VISIBLE).map((e, i) => ({ key: counter++, entrada: e, ts: Date.now() - i * 11000 })),
+    approved.slice(0, MAX_VISIBLE).map((e) => ({ key: counter++, entrada: e })),
   )
   const [selected, setSelected] = useState<Entrada | null>(null)
 
@@ -67,7 +44,7 @@ export function LiveSales({ className }: { className?: string }) {
           const idx = next.findIndex((x) => x.key === oldest.key)
           next[idx] = { ...oldest, leaving: true }
         }
-        return [{ key: counter++, entrada: approved[i], ts: Date.now() }, ...next]
+        return [{ key: counter++, entrada: approved[i] }, ...next]
       })
 
       // remove do DOM as que terminaram de sair
@@ -120,19 +97,15 @@ export function LiveSales({ className }: { className?: string }) {
                 item.leaving && 'pointer-events-none',
               )}
             >
-              <Avatar name={c.name} seed={c.avatarSeed} size={40} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="truncate text-sm font-semibold text-foreground">{e.product}</p>
+                  <p className="truncate text-sm font-semibold text-foreground">{c.name}</p>
                   <Badge tone="success">Aprovado</Badge>
                 </div>
-                <p className="mt-0.5 truncate text-xs text-muted">
-                  {c.name} · <span className="font-mono">#{e.txId}</span>
-                </p>
+                <p className="mt-0.5 truncate font-mono text-xs text-muted">#{e.txId}</p>
               </div>
               <div className="shrink-0 text-right">
                 <p className="text-sm font-bold text-foreground">{formatCurrency(e.value)}</p>
-                <p className="text-xs text-muted"><RelTime ts={item.ts} /></p>
               </div>
             </motion.button>
           )

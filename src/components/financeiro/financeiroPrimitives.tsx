@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { X, type LucideIcon } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { formatCurrency } from '../../lib/utils'
@@ -70,7 +71,9 @@ export function Modal({
   footer?: ReactNode
 }) {
   if (!open) return null
-  return (
+  // portal pro body: garante que o overlay (e o blur) fique relativo à viewport
+  // e cubra a tela inteira — incluindo a sidebar — de uma vez só
+  return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose} />
       <div className="relative z-10 w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl animate-fade-in">
@@ -83,6 +86,7 @@ export function Modal({
         {children}
         {footer && <div className="mt-6 flex justify-end gap-2">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

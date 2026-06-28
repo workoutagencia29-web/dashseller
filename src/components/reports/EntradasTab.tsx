@@ -73,11 +73,9 @@ export function EntradasTab() {
           <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} />
           <MultiSelect label="Forma de pagamento" options={PAY_METHODS} selected={pay} onChange={setPay} />
           <MultiSelect label="Status" options={STATUSES} selected={status} onChange={setStatus} />
+          <SearchInput value={search} onChange={setSearch} placeholder="Buscar nome, CPF ou CNPJ" />
         </div>
         <ExportButtons formats={['CSV']} onCsv={exportCsv} onRefresh={() => setTick((t) => t + 1)} />
-      </div>
-      <div className="mt-3">
-        <SearchInput value={search} onChange={setSearch} placeholder="Buscar nome, CPF ou CNPJ" />
       </div>
 
       {/* tabela */}
@@ -92,8 +90,7 @@ export function EntradasTab() {
               <th className="px-3 py-3 font-semibold">Método</th>
               <th className="px-3 py-3 font-semibold">Status</th>
               <th className="px-3 py-3 text-right font-semibold">Valor</th>
-              <th className="px-3 py-3 text-right font-semibold">Comissão</th>
-              <th className="py-3 pl-3 text-right font-semibold">Detalhes</th>
+              <th className="py-3 pl-3 font-semibold">Detalhes</th>
             </tr>
           </thead>
           <tbody>
@@ -106,8 +103,7 @@ export function EntradasTab() {
                 <td className="whitespace-nowrap px-3 py-3.5 text-muted">{e.method}</td>
                 <td className="px-3 py-3.5"><StatusBadge status={e.status} /></td>
                 <td className="whitespace-nowrap px-3 py-3.5 text-right font-medium text-foreground">{formatCurrency(e.value)}</td>
-                <td className="whitespace-nowrap px-3 py-3.5 text-right text-muted">{formatCurrency(e.commission)}</td>
-                <td className="py-3.5 pl-3 text-right">
+                <td className="py-3.5 pl-3">
                   <button onClick={() => setSelected(e)} className="rounded-lg border border-border px-3 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary">
                     Ver
                   </button>

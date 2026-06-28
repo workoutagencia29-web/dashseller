@@ -1,4 +1,4 @@
-import { Lock, Info } from 'lucide-react'
+import { Lock } from 'lucide-react'
 import { taxas } from '../../data/financeiroData'
 
 export function TaxasTab() {
@@ -14,13 +14,12 @@ export function TaxasTab() {
         </p>
 
         <div className="scrollbar-thin mt-5 overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse text-sm">
+          <table className="w-full min-w-[480px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
                 <th className="py-3 pr-3 font-semibold">Método</th>
                 <th className="px-3 py-3 font-semibold">Formato da Taxa</th>
-                <th className="px-3 py-3 font-semibold">Exemplo Ilustrativo</th>
-                <th className="py-3 pl-3 font-semibold">Observação</th>
+                <th className="py-3 pl-3 font-semibold">Taxa Real</th>
               </tr>
             </thead>
             <tbody>
@@ -28,32 +27,19 @@ export function TaxasTab() {
                 <tr key={t.method} className="border-b border-border/60 last:border-0">
                   <td className="whitespace-nowrap py-4 pr-3 font-semibold text-foreground">{t.method}</td>
                   <td className="px-3 py-4 text-muted">{t.format}</td>
-                  <td className="px-3 py-4">
+                  <td className="py-4 pl-3">
                     <span className="inline-block rounded-lg bg-primary/10 px-2.5 py-1 font-mono text-[13px] font-medium text-primary">
                       {t.example}
                     </span>
                   </td>
-                  <td className="py-4 pl-3 text-muted">{t.obs}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
         <p className="mt-4 text-xs text-faint">
-          Os valores acima são ilustrativos. As taxas reais podem variar por seller, volume e contrato.
+          Na Nummo suas taxas são personalizáveis de acordo com seu business, entre em contato com seu gerente para negociá-las!
         </p>
-      </div>
-
-      <div className="rounded-2xl border border-border bg-card-muted/30 p-5">
-        <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Info className="h-4 w-4 text-primary" /> Informações complementares
-        </p>
-        <ul className="space-y-2 text-sm text-muted">
-          <li>• Todas as taxas são exibidas em modo somente leitura para o seller.</li>
-          <li>• Para contestar ou renegociar taxas, entre em contato com o suporte nummo.</li>
-          <li>• Alterações de taxa são de responsabilidade exclusiva do admin do gateway.</li>
-          <li>• Versões futuras poderão exibir um simulador de taxa por valor de transação.</li>
-        </ul>
       </div>
     </div>
   )

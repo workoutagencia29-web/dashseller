@@ -261,7 +261,9 @@ export interface Taxa {
   obs: string
 }
 export const taxas: Taxa[] = [
-  { method: 'Boleto', format: '% + R$ fixo por boleto', example: '1,5% + R$ 3,50', obs: 'Cobrado por boleto gerado (pago ou não, conforme contrato).' },
   { method: 'Pix', format: '% + R$ fixo por transação', example: '0,5% + R$ 0,00', obs: 'Liquidação imediata; taxa menor que cartão.' },
+  { method: 'API Pix', format: '% + R$ fixo por transação', example: '0,4% + R$ 0,00', obs: 'Pix gerado via API (cobranças automatizadas).' },
+  { method: 'Boleto', format: '% + R$ fixo por boleto', example: '1,5% + R$ 3,50', obs: 'Cobrado por boleto gerado (pago ou não, conforme contrato).' },
   { method: 'Cartão de Crédito', format: '% por parcela + R$ fixo', example: '2,99% (1x) até 3,99% (12x) + R$ 0,50', obs: 'Taxa varia conforme o número de parcelas.' },
+  { method: 'Cartão de Débito', format: '% por transação', example: '1,49% + R$ 0,00', obs: 'Liquidação em D+1; sem parcelamento.' },
 ]

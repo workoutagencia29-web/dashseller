@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -14,6 +14,7 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
+  Camera,
 } from 'lucide-react'
 import { Header } from '../components/Header'
 import type { LayoutContext } from '../components/Layout'
@@ -40,6 +41,8 @@ interface Collaborator {
   role: string
   status: 'ativo' | 'inativo'
   seed: number
+  /** Foto enviada pelo usuário (data URL). Sem ela, usa o avatar padrão do seed. */
+  avatarUrl?: string
 }
 
 interface ActivityEntry {
@@ -95,6 +98,40 @@ const ACTIVITY: Record<number, ActivityEntry[]> = {
   ],
 }
 
+/* --------------------------- Card (conteúdo) --------------------------- */
+
+/** Miolo visual do card — compartilhado entre o card real e o fantasma,
+ *  garantindo altura idêntica para travar a posição da paginação. */
+function CollaboratorCardInner({ c }: { c: Collaborator }) {
+  return (
+    <>
+      <Avatar name={c.name} seed={c.seed} src={c.avatarUrl} size={76} />
+      <div>
+        <p className="text-base font-semibold text-foreground">{c.name}</p>
+        <div className="mt-1.5 flex items-center justify-center gap-2">
+          <Badge tone="info">{c.role}</Badge>
+          <Badge tone="success">Ativo</Badge>
+        </div>
+      </div>
+      <div className="mt-1 w-full space-y-1.5 border-t border-border pt-3 text-xs text-muted">
+        <p className="flex items-center justify-center gap-1.5">
+          <Mail className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">{c.email}</span>
+        </p>
+        <p className="flex items-center justify-center gap-1.5">
+          <Phone className="h-3.5 w-3.5 shrink-0" /> {c.phone}
+        </p>
+        <p className="flex items-center justify-center gap-1.5">
+          <IdCard className="h-3.5 w-3.5 shrink-0" /> {c.cpf}
+        </p>
+      </div>
+    </>
+  )
+}
+
+const CARD_CLASS =
+  'flex flex-col items-center gap-3 rounded-3xl border border-border bg-card p-6 text-center'
+
 /* ============================== Página ================================ */
 
 export default function Colaboradores() {
@@ -147,36 +184,26 @@ export default function Colaboradores() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               onClick={() => setSelectedId(c.id)}
-              className="flex flex-col items-center gap-3 rounded-3xl border border-border bg-card p-6 text-center transition-colors hover:border-primary/40 hover:bg-card-muted/40"
+              className={cn(CARD_CLASS, 'transition-colors hover:border-primary/40 hover:bg-card-muted/40')}
             >
-              <Avatar name={c.name} seed={c.seed} size={76} />
-              <div>
-                <p className="text-base font-semibold text-foreground">{c.name}</p>
-                <div className="mt-1.5 flex items-center justify-center gap-2">
-                  <Badge tone="info">{c.role}</Badge>
-                  <Badge tone="success">Ativo</Badge>
-                </div>
-              </div>
-              <div className="mt-1 w-full space-y-1.5 border-t border-border pt-3 text-xs text-muted">
-                <p className="flex items-center justify-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{c.email}</span>
-                </p>
-                <p className="flex items-center justify-center gap-1.5">
-                  <Phone className="h-3.5 w-3.5 shrink-0" /> {c.phone}
-                </p>
-                <p className="flex items-center justify-center gap-1.5">
-                  <IdCard className="h-3.5 w-3.5 shrink-0" /> {c.cpf}
-                </p>
-              </div>
+              <CollaboratorCardInner c={c} />
             </motion.button>
           ))}
+
+          {/* cards-fantasma: completam a última página para travar a altura
+              da grade (a paginação fica sempre na mesma posição) */}
+          {active.length > PER_PAGE &&
+            Array.from({ length: PER_PAGE - paged.length }).map((_, i) => (
+              <div key={`ph-${i}`} aria-hidden className={cn(CARD_CLASS, 'invisible')}>
+                <CollaboratorCardInner c={paged[0]} />
+              </div>
+            ))}
         </div>
       )}
 
       {/* paginação */}
       {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-1.5">
+        <div className="mt-12 flex items-center justify-center gap-1.5">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={safePage === 1}
@@ -258,7 +285,7 @@ function CollaboratorModal({
 }: {
   collaborator: Collaborator
   onClose: () => void
-  onSave: (data: Pick<Collaborator, 'name' | 'email' | 'phone' | 'cpf' | 'role'>) => void
+  onSave: (data: Pick<Collaborator, 'name' | 'email' | 'phone' | 'cpf' | 'role' | 'avatarUrl'>) => void
   onDeactivate: () => void
 }) {
   const [name, setName] = useState(collaborator.name)
@@ -266,7 +293,9 @@ function CollaboratorModal({
   const [phone, setPhone] = useState(collaborator.phone)
   const [cpf, setCpf] = useState(collaborator.cpf)
   const [role, setRole] = useState(collaborator.role)
+  const [avatarUrl, setAvatarUrl] = useState(collaborator.avatarUrl)
   const [confirmOff, setConfirmOff] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   // fecha com ESC
   useEffect(() => {
@@ -277,12 +306,25 @@ function CollaboratorModal({
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  // lê o arquivo escolhido como data URL e mostra no preview (só persiste ao salvar)
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result === 'string') setAvatarUrl(reader.result)
+    }
+    reader.readAsDataURL(file)
+    e.target.value = '' // permite re-selecionar o mesmo arquivo
+  }
+
   const dirty =
     name !== collaborator.name ||
     email !== collaborator.email ||
     phone !== collaborator.phone ||
     cpf !== collaborator.cpf ||
-    role !== collaborator.role
+    role !== collaborator.role ||
+    avatarUrl !== collaborator.avatarUrl
 
   const logs = ACTIVITY[collaborator.id] ?? []
 
@@ -297,7 +339,28 @@ function CollaboratorModal({
       >
         {/* cabeçalho */}
         <div className="flex items-start gap-4">
-          <Avatar name={collaborator.name} seed={collaborator.seed} size={64} />
+          <div className="shrink-0">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="group relative block rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+              aria-label="Alterar foto"
+              title="Alterar foto"
+            >
+              <Avatar name={collaborator.name} seed={collaborator.seed} src={avatarUrl} size={64} />
+              <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 rounded-full bg-black/55 opacity-0 transition-opacity group-hover:opacity-100">
+                <Camera className="h-5 w-5 text-white" />
+                <span className="text-[9px] font-semibold uppercase tracking-wide text-white">Alterar</span>
+              </span>
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFile}
+            />
+          </div>
           <div className="min-w-0 flex-1">
             <h3 className="truncate text-lg font-bold text-foreground">{collaborator.name}</h3>
             <div className="mt-1.5 flex items-center gap-2">
@@ -374,7 +437,7 @@ function CollaboratorModal({
             </div>
           )}
 
-          <Button size="sm" disabled={!dirty} onClick={() => onSave({ name, email, phone, cpf, role })}>
+          <Button size="sm" disabled={!dirty} onClick={() => onSave({ name, email, phone, cpf, role, avatarUrl })}>
             Salvar alterações
           </Button>
         </div>

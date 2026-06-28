@@ -33,7 +33,19 @@ export function DateRangeFilter({ preset, customRange, onChange }: DateRangeFilt
   const [open, setOpen] = useState(false)
   const [view, setView] = useState<'presets' | 'calendar'>('presets')
   const [sel, setSel] = useState<RdpRange | undefined>(undefined)
+  const [alignRight, setAlignRight] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+
+  /** Abre/fecha decidindo o lado: por padrão abre pra direita (longe da sidebar);
+   *  só ancora à direita se abrir pra direita estouraria a borda da tela. */
+  function toggle() {
+    if (!open && ref.current) {
+      const rect = ref.current.getBoundingClientRect()
+      const MENU_W = 326 // largura máxima do menu (view calendário)
+      setAlignRight(rect.left + MENU_W > window.innerWidth - 8)
+    }
+    setOpen((o) => !o)
+  }
 
   useEffect(() => {
     if (!open) return
@@ -82,7 +94,7 @@ export function DateRangeFilter({ preset, customRange, onChange }: DateRangeFilt
     <div ref={ref} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggle}
         className="flex items-center gap-2 rounded-xl border border-border bg-input/60 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-input"
       >
         <CalendarDays className="h-4 w-4 text-muted" />
@@ -93,7 +105,12 @@ export function DateRangeFilter({ preset, customRange, onChange }: DateRangeFilt
       </button>
 
       {open && (
-        <div className="absolute right-0 z-30 mt-2 origin-top-right overflow-hidden rounded-xl border border-border bg-card shadow-xl shadow-black/30 animate-fade-in">
+        <div
+          className={cn(
+            'absolute z-30 mt-2 overflow-hidden rounded-xl border border-border bg-card shadow-xl shadow-black/30 animate-fade-in',
+            alignRight ? 'right-0 origin-top-right' : 'left-0 origin-top-left',
+          )}
+        >
           {view === 'presets' ? (
             <div className="w-52 p-1.5">
               {PRESETS.map((p) => {

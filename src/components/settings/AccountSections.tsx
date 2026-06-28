@@ -164,9 +164,12 @@ export function CompanySection() {
 
 /* ----------------------- Dados Bancários ------------------------------ */
 
+const MAX_ACCOUNTS = 3
+
 export function BankSection() {
   const [accounts, setAccounts] = useState<BankAccount[]>(initialBankAccounts)
   const [open, setOpen] = useState(false)
+  const atLimit = accounts.length >= MAX_ACCOUNTS
 
   function setPrimary(id: number) {
     setAccounts((list) => list.map((a) => ({ ...a, primary: a.id === id })))
@@ -175,6 +178,7 @@ export function BankSection() {
     setAccounts((list) => list.filter((a) => a.id !== id))
   }
   function addAccount() {
+    if (accounts.length >= MAX_ACCOUNTS) return
     const id = Math.max(0, ...accounts.map((a) => a.id)) + 1
     setAccounts((list) => [
       ...list,
@@ -189,7 +193,12 @@ export function BankSection() {
       title="Dados Bancários"
       description="Contas para liquidação. Ao adicionar uma conta, enviamos R$ 0,01 (ou micro-Pix) para confirmar a titularidade."
       action={
-        <Button size="sm" onClick={() => setOpen(true)}>
+        <Button
+          size="sm"
+          onClick={() => setOpen(true)}
+          disabled={atLimit}
+          title={atLimit ? `Limite de ${MAX_ACCOUNTS} contas atingido` : undefined}
+        >
           <Plus className="h-4 w-4" /> Adicionar conta
         </Button>
       }
@@ -232,6 +241,11 @@ export function BankSection() {
           <p className="py-6 text-center text-sm text-muted">Nenhuma conta cadastrada.</p>
         )}
       </div>
+
+      <p className="mt-3 text-xs text-faint">
+        <span className="font-medium text-muted">{accounts.length} de {MAX_ACCOUNTS}</span> contas cadastradas.
+        {atLimit && ' Remova uma conta para adicionar outra.'}
+      </p>
 
       <Modal open={open} title="Adicionar conta bancária" onClose={() => setOpen(false)}>
         <div className="space-y-4">

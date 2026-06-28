@@ -7,6 +7,7 @@ import { formatCurrency } from '../../lib/utils'
 import { Button } from '../settings/primitives'
 import {
   MultiSelect,
+  SearchInput,
   ExportButtons,
   ReportCard,
   StatusBadge,
@@ -46,6 +47,7 @@ export function SaidasTab() {
   const [customRange, setCustomRange] = useState<DateRange | null>(null)
   const [status, setStatus] = useState<string[]>([])
   const [types, setTypes] = useState<string[]>([])
+  const [search, setSearch] = useState('')
   const [tick, setTick] = useState(0)
   const [selected, setSelected] = useState<Saida | null>(null)
 
@@ -56,13 +58,16 @@ export function SaidasTab() {
   )
 
   const rows = useMemo(() => {
+    const q = search.trim().toLowerCase()
     return saidas.filter((s) => {
       const inPeriod = s.date >= range.from && s.date <= range.to
       const matchesStatus = status.length === 0 || status.includes(s.status)
       const matchesType = types.length === 0 || types.includes(s.type)
-      return inPeriod && matchesStatus && matchesType
+      const matchesSearch =
+        !q || s.recipient.toLowerCase().includes(q) || s.txId.toLowerCase().includes(q)
+      return inPeriod && matchesStatus && matchesType && matchesSearch
     })
-  }, [range, status, types])
+  }, [range, status, types, search])
 
   function exportCsv() {
     downloadCsv(
@@ -93,10 +98,11 @@ export function SaidasTab() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2.5">
           <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} />
-          <MultiSelect label="Status" options={STATUSES} selected={status} onChange={setStatus} />
           <MultiSelect label="Tipo de operação" options={TYPES} selected={types} onChange={setTypes} />
+          <MultiSelect label="Status" options={STATUSES} selected={status} onChange={setStatus} />
+          <SearchInput value={search} onChange={setSearch} placeholder="Buscar destinatário ou ID" />
         </div>
-        <ExportButtons formats={['CSV', 'PDF', 'OFX', 'ZIP']} onCsv={exportCsv} onRefresh={() => setTick((t) => t + 1)} />
+        <ExportButtons formats={['CSV']} onCsv={exportCsv} onRefresh={() => setTick((t) => t + 1)} />
       </div>
 
       {/* tabela */}
@@ -106,12 +112,10 @@ export function SaidasTab() {
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
               <th className="py-3 pr-3 font-semibold">Data</th>
               <th className="px-3 py-3 font-semibold">Destinatário</th>
-              <th className="px-3 py-3 text-right font-semibold">Valor Bruto</th>
-              <th className="px-3 py-3 text-right font-semibold">Valor Líquido</th>
+              <th className="px-3 py-3 font-semibold">Valor</th>
               <th className="px-3 py-3 font-semibold">Status</th>
-              <th className="px-3 py-3 font-semibold">Tipo</th>
               <th className="px-3 py-3 font-semibold">ID</th>
-              <th className="py-3 pl-3 text-right font-semibold">Detalhes</th>
+              <th className="py-3 pl-3 font-semibold">Detalhes</th>
             </tr>
           </thead>
           <tbody>
@@ -119,12 +123,10 @@ export function SaidasTab() {
               <tr key={s.id} className="border-b border-border/60 transition-colors last:border-0 hover:bg-card-muted/40">
                 <td className="whitespace-nowrap py-3.5 pr-3 text-muted">{fmtDateTime(s.date)}</td>
                 <td className="whitespace-nowrap px-3 py-3.5 font-medium text-foreground">{s.recipient}</td>
-                <td className="whitespace-nowrap px-3 py-3.5 text-right text-muted">{formatCurrency(s.valorBruto)}</td>
-                <td className="whitespace-nowrap px-3 py-3.5 text-right font-medium text-foreground">{formatCurrency(s.valorLiquido)}</td>
+                <td className="whitespace-nowrap px-3 py-3.5 font-semibold text-foreground">{formatCurrency(s.valorLiquido)}</td>
                 <td className="px-3 py-3.5"><StatusBadge status={s.status} /></td>
-                <td className="px-3 py-3.5"><TypeBadge type={s.type} /></td>
                 <td className="whitespace-nowrap px-3 py-3.5 font-mono text-[13px] text-muted">{s.txId}</td>
-                <td className="py-3.5 pl-3 text-right">
+                <td className="py-3.5 pl-3">
                   <button onClick={() => setSelected(s)} className="rounded-lg border border-border px-3 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary">
                     Ver
                   </button>

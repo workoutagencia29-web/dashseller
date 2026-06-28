@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Wallet, Clock, ShieldCheck, AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Eye, X } from 'lucide-react'
 import {
   balances,
@@ -19,9 +20,19 @@ const fmtDateTime = (d: Date) =>
   `${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
 
 export function GeralTab() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [internal, setInternal] = useState('Extrato')
   const [modal, setModal] = useState<null | 'depositar' | 'saque' | 'antecipar'>(null)
   const [saques, setSaques] = useState<Saque[]>(saquesData)
+
+  // vindo do card "Meu saldo disponível" do dashboard: já abre o modal de saque
+  useEffect(() => {
+    if ((location.state as { openSaque?: boolean } | null)?.openSaque) {
+      setModal('saque')
+      navigate(location.pathname, { replace: true, state: null }) // limpa pra não reabrir
+    }
+  }, [location.state, location.pathname, navigate])
 
   const [preset, setPreset] = useState<RangePreset>('all')
   const [customRange, setCustomRange] = useState<DateRange | null>(null)
@@ -61,12 +72,12 @@ export function GeralTab() {
         <BalanceCard label="Saldo em Protesto" value={balances.protesto} obs="Desbloqueado após resolução" icon={AlertTriangle} />
       </div>
 
-      {/* ações */}
-      <div className="flex flex-wrap gap-3">
-        <Button onClick={() => setModal('depositar')}>
+      {/* ações — mesma grade dos cards: Depositar cobre 2 cards (até A Receber), Saque os outros 2 (até Protesto) */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Button onClick={() => setModal('depositar')} className="w-full sm:col-span-2">
           <ArrowDownToLine className="h-4 w-4" /> Depositar
         </Button>
-        <Button variant="outline" onClick={() => setModal('saque')}>
+        <Button variant="outline" onClick={() => setModal('saque')} className="w-full sm:col-span-2">
           <ArrowUpFromLine className="h-4 w-4" /> Saque
         </Button>
       </div>
@@ -83,25 +94,25 @@ export function GeralTab() {
             <table className="w-full min-w-[720px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
-                  <th className="py-3 pr-3 font-semibold">Tipo</th>
+                  <th className="py-3 pr-3 font-semibold">Data</th>
+                  <th className="px-3 py-3 font-semibold">Valor</th>
+                  <th className="px-3 py-3 font-semibold">Tipo</th>
                   <th className="px-3 py-3 font-semibold">Descrição</th>
                   <th className="px-3 py-3 font-semibold">Categoria</th>
-                  <th className="px-3 py-3 font-semibold">Data</th>
-                  <th className="px-3 py-3 text-right font-semibold">Valor</th>
-                  <th className="py-3 pl-3 text-right font-semibold">Ações</th>
+                  <th className="py-3 pl-3 font-semibold">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {mov.map((m) => (
                   <tr key={m.id} className="border-b border-border/60 last:border-0 hover:bg-card-muted/40">
-                    <td className="whitespace-nowrap py-3.5 pr-3 font-medium text-foreground">{m.type}</td>
-                    <td className="px-3 py-3.5 text-muted">{m.description}</td>
-                    <td className="whitespace-nowrap px-3 py-3.5 text-muted">{m.category}</td>
-                    <td className="whitespace-nowrap px-3 py-3.5 text-muted">{fmtDateTime(m.date)}</td>
-                    <td className={cn('whitespace-nowrap px-3 py-3.5 text-right font-semibold', m.value >= 0 ? 'text-positive' : 'text-negative')}>
+                    <td className="whitespace-nowrap py-3.5 pr-3 text-muted">{fmtDateTime(m.date)}</td>
+                    <td className={cn('whitespace-nowrap px-3 py-3.5 font-semibold', m.value >= 0 ? 'text-positive' : 'text-negative')}>
                       {m.value >= 0 ? '+' : '−'} {formatCurrency(Math.abs(m.value))}
                     </td>
-                    <td className="py-3.5 pl-3 text-right">
+                    <td className="whitespace-nowrap px-3 py-3.5 text-muted">{m.type}</td>
+                    <td className="px-3 py-3.5 text-muted">{m.description}</td>
+                    <td className="whitespace-nowrap px-3 py-3.5 text-muted">{m.category}</td>
+                    <td className="py-3.5 pl-3">
                       <button className="rounded-lg p-1.5 text-muted transition-colors hover:bg-card-muted hover:text-foreground" aria-label="Ver comprovante">
                         <Eye className="h-4 w-4" />
                       </button>
@@ -116,27 +127,27 @@ export function GeralTab() {
             <table className="w-full min-w-[640px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
-                  <th className="py-3 pr-3 text-right font-semibold">Valor</th>
+                  <th className="py-3 pr-3 font-semibold">Data de Solicitação</th>
+                  <th className="px-3 py-3 font-semibold">Valor</th>
                   <th className="px-3 py-3 font-semibold">Chave Pix</th>
-                  <th className="px-3 py-3 font-semibold">Status</th>
-                  <th className="px-3 py-3 font-semibold">Data de Solicitação</th>
-                  <th className="py-3 pl-3 text-right font-semibold">Ações</th>
+                  <th className="px-3 py-3 font-semibold">Ações</th>
+                  <th className="py-3 pl-3 font-semibold">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {saq.map((s) => (
                   <tr key={s.id} className="border-b border-border/60 last:border-0 hover:bg-card-muted/40">
-                    <td className="whitespace-nowrap py-3.5 pr-3 text-right font-semibold text-foreground">{formatCurrency(s.value)}</td>
+                    <td className="whitespace-nowrap py-3.5 pr-3 text-muted">{fmtDateTime(s.date)}</td>
+                    <td className="whitespace-nowrap px-3 py-3.5 font-semibold text-foreground">{formatCurrency(s.value)}</td>
                     <td className="whitespace-nowrap px-3 py-3.5 text-muted">{s.pixKey}</td>
-                    <td className="px-3 py-3.5"><StatusBadge status={s.status} /></td>
-                    <td className="whitespace-nowrap px-3 py-3.5 text-muted">{fmtDateTime(s.date)}</td>
-                    <td className="py-3.5 pl-3 text-right">
+                    <td className="px-3 py-3.5">
                       {(s.status === 'Pendente' || s.status === 'Em Revisão') && (
                         <Button size="sm" variant="ghost" onClick={() => setSaques((l) => l.filter((x) => x.id !== s.id))}>
                           <X className="h-3.5 w-3.5" /> Cancelar
                         </Button>
                       )}
                     </td>
+                    <td className="py-3.5 pl-3"><StatusBadge status={s.status} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -147,21 +158,21 @@ export function GeralTab() {
             <table className="w-full min-w-[640px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
-                  <th className="py-3 pr-3 text-right font-semibold">Valor Bruto</th>
+                  <th className="py-3 pr-3 font-semibold">Data</th>
+                  <th className="px-3 py-3 font-semibold">Valor Bruto</th>
                   <th className="px-3 py-3 font-semibold">Taxa</th>
-                  <th className="px-3 py-3 text-right font-semibold">Líquido</th>
-                  <th className="px-3 py-3 font-semibold">Status</th>
-                  <th className="py-3 pl-3 font-semibold">Data</th>
+                  <th className="px-3 py-3 font-semibold">Líquido</th>
+                  <th className="py-3 pl-3 font-semibold">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {ant.map((a) => (
                   <tr key={a.id} className="border-b border-border/60 last:border-0 hover:bg-card-muted/40">
-                    <td className="whitespace-nowrap py-3.5 pr-3 text-right text-muted">{formatCurrency(a.bruto)}</td>
+                    <td className="whitespace-nowrap py-3.5 pr-3 text-muted">{a.date.toLocaleDateString('pt-BR')}</td>
+                    <td className="whitespace-nowrap px-3 py-3.5 font-semibold text-foreground">{formatCurrency(a.bruto)}</td>
                     <td className="whitespace-nowrap px-3 py-3.5 text-muted">{a.taxa.toString().replace('.', ',')}% a.m.</td>
-                    <td className="whitespace-nowrap px-3 py-3.5 text-right font-semibold text-foreground">{formatCurrency(a.liquido)}</td>
-                    <td className="px-3 py-3.5"><StatusBadge status={a.status} /></td>
-                    <td className="whitespace-nowrap py-3.5 pl-3 text-muted">{a.date.toLocaleDateString('pt-BR')}</td>
+                    <td className="whitespace-nowrap px-3 py-3.5 font-semibold text-foreground">{formatCurrency(a.liquido)}</td>
+                    <td className="py-3.5 pl-3"><StatusBadge status={a.status} /></td>
                   </tr>
                 ))}
               </tbody>

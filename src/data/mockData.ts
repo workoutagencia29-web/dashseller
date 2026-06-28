@@ -98,7 +98,7 @@ export const stats: Stat[] = [
   { id: 'total', label: 'Total de Vendas', value: 3540, delta: 25.5, icon: 'employees', format: 'currency' },
   { id: 'applicants', label: 'Vendas Aprovadas', value: 1150, delta: 4.1, icon: 'applicants' },
   { id: 'new', label: 'Ticket Médio', value: 500, delta: 5.1, icon: 'new', format: 'currency' },
-  { id: 'resigned', label: 'Saldo Disponível', value: 93, delta: -25.5, icon: 'resigned', format: 'currency' },
+  { id: 'resigned', label: 'Saldo Disponível', value: 254782.45, delta: 25.5, icon: 'resigned', format: 'currency' },
 ]
 
 /* ------------------------- Desempenho da equipe ----------------------- */
@@ -193,10 +193,10 @@ export interface DonutSegment {
 }
 
 export const totalEmployeeData: DonutSegment[] = [
-  { label: 'Pix', value: 58, color: '#2f6bff' },
-  { label: 'Cartões', value: 41, color: '#8b5cf6' },
-  { label: 'Boleto', value: 14, color: '#f5c043' },
-  { label: 'Outros', value: 8, color: '#2dd4bf' },
+  { label: 'Pix', value: 58, color: '#1b47c4' },
+  { label: 'Cartões', value: 41, color: '#2f6bff' },
+  { label: 'Boleto', value: 14, color: '#6c97ff' },
+  { label: 'Outros', value: 8, color: '#aecbff' },
 ]
 
 export const totalEmployeeCount = totalEmployeeData.reduce((sum, s) => sum + s.value, 0)
@@ -212,8 +212,8 @@ export interface MethodConversion {
 }
 
 export const methodConversions: MethodConversion[] = [
-  { label: 'Pix', color: '#2f6bff', icon: 'pix', conversion: 92, value: 34520, count: 58 },
-  { label: 'Cartões', color: '#8b5cf6', icon: 'card', conversion: 78, value: 28140.5, count: 41 },
-  { label: 'Boleto', color: '#f5c043', icon: 'boleto', conversion: 64, value: 9870, count: 14 },
-  { label: 'Outros', color: '#2dd4bf', icon: 'other', conversion: 45, value: 4210, count: 8 },
+  { label: 'Pix', color: '#1b47c4', icon: 'pix', conversion: 92, value: 34520, count: 58 },
+  { label: 'Cartões', color: '#2f6bff', icon: 'card', conversion: 78, value: 28140.5, count: 41 },
+  { label: 'Boleto', color: '#6c97ff', icon: 'boleto', conversion: 64, value: 9870, count: 14 },
+  { label: 'Outros', color: '#aecbff', icon: 'other', conversion: 45, value: 4210, count: 8 },
 ]

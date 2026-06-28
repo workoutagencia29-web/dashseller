@@ -87,7 +87,7 @@ export function TotalEmployeeDonut() {
       </div>
 
       {/* conversão por método */}
-      <div className="mt-6 divide-y divide-border">
+      <div className="mt-14 divide-y divide-border">
         {methodConversions.map((m) => {
           const Icon = METHOD_ICONS[m.icon]
           return (

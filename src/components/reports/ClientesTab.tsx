@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
-import { clients, clientFirstPurchase, clientTransactions } from '../../data/reportsData'
+import { clients, clientFirstPurchase, clientTransactions, type Client } from '../../data/reportsData'
 import { DateRangeFilter } from '../ui/DateRangeFilter'
 import { presetRange, addDays, startOfDay, type RangePreset, type DateRange } from '../../lib/date'
-import { Avatar } from '../ui/Avatar'
 import { SearchInput, ExportButtons, ReportCard, downloadCsv } from './reportsPrimitives'
+import { ClienteDetalheModal } from './ClienteDetalheModal'
 
 const fmtDate = (d: Date | null) => (d ? d.toLocaleDateString('pt-BR') : '—')
 
@@ -14,6 +13,7 @@ export function ClientesTab() {
   const [customRange, setCustomRange] = useState<DateRange | null>(null)
   const [search, setSearch] = useState('')
   const [tick, setTick] = useState(0)
+  const [selected, setSelected] = useState<Client | null>(null)
 
   const start = useMemo(() => addDays(startOfDay(new Date()), -60), [])
   const range = useMemo(
@@ -67,28 +67,25 @@ export function ClientesTab() {
               <th className="px-3 py-3 font-semibold">E-mail</th>
               <th className="px-3 py-3 font-semibold">CPF / CNPJ</th>
               <th className="px-3 py-3 font-semibold">Primeira Compra</th>
-              <th className="py-3 pl-3 text-right font-semibold">Ações</th>
+              <th className="py-3 pl-3 font-semibold">Ações</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((c) => (
               <tr key={c.id} className="border-b border-border/60 transition-colors last:border-0 hover:bg-card-muted/40">
-                <td className="py-3.5 pr-3">
-                  <div className="flex items-center gap-3">
-                    <Avatar name={c.name} seed={c.avatarSeed} size={36} />
-                    <span className="font-medium text-foreground">{c.name}</span>
-                  </div>
+                <td className="whitespace-nowrap py-3.5 pr-3">
+                  <span className="font-medium text-foreground">{c.name}</span>
                 </td>
                 <td className="whitespace-nowrap px-3 py-3.5 text-muted">{c.email}</td>
                 <td className="whitespace-nowrap px-3 py-3.5 text-muted">{c.document}</td>
                 <td className="whitespace-nowrap px-3 py-3.5 text-muted">{fmtDate(clientFirstPurchase(c.id))}</td>
-                <td className="py-3.5 pl-3 text-right">
-                  <Link
-                    to={`/relatorio/clientes/${c.id}`}
+                <td className="py-3.5 pl-3">
+                  <button
+                    onClick={() => setSelected(c)}
                     className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary"
                   >
                     Ações <ChevronRight className="h-3.5 w-3.5" />
-                  </Link>
+                  </button>
                 </td>
               </tr>
             ))}
@@ -100,6 +97,9 @@ export function ClientesTab() {
       <p className="mt-4 border-t border-border pt-4 text-sm text-muted">
         <span className="font-semibold text-foreground">{rows.length}</span> cliente(s) no período
       </p>
+
+      {/* pop-up de detalhes do cliente */}
+      <ClienteDetalheModal client={selected} onClose={() => setSelected(null)} />
     </ReportCard>
   )
 }

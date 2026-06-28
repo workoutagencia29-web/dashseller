@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { cn } from '../../lib/utils'
 
 interface AvatarProps {
@@ -6,6 +6,8 @@ interface AvatarProps {
   seed: number
   size?: number
   className?: string
+  /** Foto custom (ex.: upload do usuário em data URL). Cai pro pravatar/iniciais se ausente. */
+  src?: string
 }
 
 const GRADIENTS = [
@@ -29,9 +31,12 @@ function initials(name: string): string {
  * Photo avatar from pravatar with a graceful gradient-initials fallback
  * if the image fails to load (e.g. offline).
  */
-export function Avatar({ name, seed, size = 36, className }: AvatarProps) {
+export function Avatar({ name, seed, size = 36, className, src }: AvatarProps) {
   const [failed, setFailed] = useState(false)
   const gradient = GRADIENTS[seed % GRADIENTS.length]
+
+  // se a fonte mudar (ex.: usuário trocou a foto), volta a tentar carregar
+  useEffect(() => setFailed(false), [src, seed])
 
   if (failed) {
     return (
@@ -51,7 +56,7 @@ export function Avatar({ name, seed, size = 36, className }: AvatarProps) {
 
   return (
     <img
-      src={`https://i.pravatar.cc/96?img=${seed}`}
+      src={src ?? `https://i.pravatar.cc/96?img=${seed}`}
       alt={name}
       width={size}
       height={size}

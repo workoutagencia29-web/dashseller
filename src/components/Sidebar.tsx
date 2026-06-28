@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { ChevronDown, ChevronsLeft, Settings, Sun, Moon } from 'lucide-react'
 import { navItems, type NavItem } from '../data/mockData'
 import { cn } from '../lib/utils'
@@ -243,29 +244,47 @@ function ThemeToggle({
     )
   }
 
+  const pillTransition = { type: 'spring' as const, stiffness: 380, damping: 32 }
+
   return (
     <div className="mt-1 flex items-center gap-1 rounded-xl bg-card-muted p-1">
       <button
         onClick={() => onSet('light')}
         className={cn(
-          'flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors',
-          theme === 'light' ? 'bg-card text-foreground shadow-sm' : 'text-muted hover:text-foreground',
+          'relative flex flex-1 items-center justify-center rounded-lg py-2 text-sm font-medium transition-colors',
+          theme === 'light' ? 'text-foreground' : 'text-muted hover:text-foreground',
         )}
       >
-        <Sun className="h-4 w-4" />
-        Claro
+        {theme === 'light' && (
+          <motion.span
+            layoutId="theme-pill"
+            transition={pillTransition}
+            className="absolute inset-0 rounded-lg bg-card shadow-sm"
+          />
+        )}
+        <span className="relative z-10 flex items-center gap-2">
+          <Sun className="h-4 w-4" />
+          Claro
+        </span>
       </button>
       <button
         onClick={() => onSet('dark')}
         className={cn(
-          'flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors',
-          theme === 'dark'
-            ? 'bg-primary text-primary-foreground shadow-sm'
-            : 'text-muted hover:text-foreground',
+          'relative flex flex-1 items-center justify-center rounded-lg py-2 text-sm font-medium transition-colors',
+          theme === 'dark' ? 'text-primary-foreground' : 'text-muted hover:text-foreground',
         )}
       >
-        <Moon className="h-4 w-4" />
-        Escuro
+        {theme === 'dark' && (
+          <motion.span
+            layoutId="theme-pill"
+            transition={pillTransition}
+            className="absolute inset-0 rounded-lg bg-primary shadow-sm"
+          />
+        )}
+        <span className="relative z-10 flex items-center gap-2">
+          <Moon className="h-4 w-4" />
+          Escuro
+        </span>
       </button>
     </div>
   )

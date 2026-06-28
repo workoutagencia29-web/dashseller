@@ -17,6 +17,7 @@ import {
   formatHour,
   formatDayMonth,
   startOfDay,
+  endOfDay,
   type RangePreset,
   type DateRange,
 } from '../lib/date'
@@ -52,8 +53,10 @@ export function TeamPerformanceChart() {
   const hourly = isHourly(preset)
 
   const data: ChartRow[] = useMemo(() => {
-    const fromT = range.from.getTime()
-    const toT = range.to.getTime()
+    // modo por hora (Hoje/Ontem): mostra o dia inteiro fixo (00h–23h),
+    // independente da hora atual; senão usa o range do preset (até agora)
+    const fromT = (hourly ? startOfDay(range.from) : range.from).getTime()
+    const toT = (hourly ? endOfDay(range.from) : range.to).getTime()
     const pts = salesData.filter((p) => {
       const t = p.date.getTime()
       return t >= fromT && t <= toT
@@ -105,8 +108,9 @@ export function TeamPerformanceChart() {
               tickLine={false}
               tickMargin={12}
               fontSize={12}
-              minTickGap={hourly ? 16 : 28}
-              interval="preserveStartEnd"
+              minTickGap={hourly ? 0 : 28}
+              // por hora: 1 tick sim, 1 não → 00h, 02h, 04h... (de 2 em 2)
+              interval={hourly ? 1 : 'preserveStartEnd'}
             />
             <YAxis
               axisLine={false}
