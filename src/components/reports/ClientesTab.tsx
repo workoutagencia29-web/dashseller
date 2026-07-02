@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ChevronRight } from 'lucide-react'
 import { clients, clientFirstPurchase, clientTransactions, type Client } from '../../data/reportsData'
 import { DateRangeFilter } from '../ui/DateRangeFilter'
 import { presetRange, addDays, startOfDay, type RangePreset, type DateRange } from '../../lib/date'
-import { SearchInput, ExportButtons, ReportCard, downloadCsv } from './reportsPrimitives'
+import { SearchInput, ExportButtons, ReportCard, downloadCsv, Pagination, GhostRows } from './reportsPrimitives'
 import { ClienteDetalheModal } from './ClienteDetalheModal'
+
+const PER_PAGE = 10
 
 const fmtDate = (d: Date | null) => (d ? d.toLocaleDateString('pt-BR') : '—')
 
@@ -14,6 +16,7 @@ export function ClientesTab() {
   const [search, setSearch] = useState('')
   const [tick, setTick] = useState(0)
   const [selected, setSelected] = useState<Client | null>(null)
+  const [page, setPage] = useState(1)
 
   const start = useMemo(() => addDays(startOfDay(new Date()), -60), [])
   const range = useMemo(
@@ -33,6 +36,12 @@ export function ClientesTab() {
       return matchesSearch && inPeriod
     })
   }, [search, range])
+
+  // paginação: 10 por página
+  const totalPages = Math.max(1, Math.ceil(rows.length / PER_PAGE))
+  const safePage = Math.min(page, totalPages)
+  const paged = rows.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
+  useEffect(() => setPage(1), [rows]) // volta pra 1 quando o filtro/busca muda
 
   function handleChange(next: RangePreset, custom?: DateRange) {
     setPreset(next)
@@ -60,7 +69,7 @@ export function ClientesTab() {
 
       {/* tabela */}
       <div className="scrollbar-thin mt-5 overflow-x-auto">
-        <table className="w-full min-w-[680px] border-collapse text-sm">
+        <table className="w-full min-w-[680px] table-fixed border-collapse text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
               <th className="py-3 pr-3 font-semibold">Cliente</th>
@@ -71,7 +80,7 @@ export function ClientesTab() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((c) => (
+            {paged.map((c) => (
               <tr key={c.id} className="border-b border-border/60 transition-colors last:border-0 hover:bg-card-muted/40">
                 <td className="whitespace-nowrap py-3.5 pr-3">
                   <span className="font-medium text-foreground">{c.name}</span>
@@ -89,10 +98,13 @@ export function ClientesTab() {
                 </td>
               </tr>
             ))}
+            <GhostRows count={paged.length === 0 ? 0 : PER_PAGE - paged.length} colSpan={5} />
           </tbody>
         </table>
         {rows.length === 0 && <p className="py-12 text-center text-sm text-muted">Nenhum cliente encontrado para os filtros atuais.</p>}
       </div>
+
+      <Pagination page={safePage} totalPages={totalPages} onChange={setPage} />
 
       <p className="mt-4 border-t border-border pt-4 text-sm text-muted">
         <span className="font-semibold text-foreground">{rows.length}</span> cliente(s) no período

@@ -15,7 +15,7 @@ export function BalanceCard({
 }: {
   label: string
   value: number
-  obs: string
+  obs?: string
   icon: LucideIcon
   action?: ReactNode
 }) {
@@ -28,7 +28,7 @@ export function BalanceCard({
         </span>
       </div>
       <p className="mt-3 text-[22px] font-bold leading-none tracking-tight text-foreground">{formatCurrency(value)}</p>
-      <p className="mt-2 text-xs text-muted">{obs}</p>
+      <p className="mt-2 text-xs text-muted">{obs || ' '}</p>
       {action && <div className="mt-3">{action}</div>}
     </div>
   )

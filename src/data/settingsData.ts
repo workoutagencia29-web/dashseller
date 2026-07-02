@@ -119,13 +119,9 @@ export const auditLog: AuditEntry[] = [
   { id: 4, member: 'Pristia Candra', action: 'Alterou o endpoint de webhook', datetime: '22/06/2026 19:32' },
 ]
 
-/** Eventos que disparam notificações pessoais (canais por evento). */
+/** Eventos de venda que disparam notificações pessoais. */
 export const personalNotifEvents = [
-  'Nova venda aprovada',
-  'Pagamento recusado',
-  'Chargeback recebido',
-  'Liquidação processada',
-  'Saldo disponível para saque',
-]
-
-export const personalNotifChannels = ['E-mail', 'SMS', 'WhatsApp', 'Push web']
+  { key: 'aprovada', label: 'Venda aprovada' },
+  { key: 'pendente', label: 'Venda pendente' },
+  { key: 'recusada', label: 'Venda recusada' },
+] as const

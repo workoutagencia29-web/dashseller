@@ -82,7 +82,9 @@ export function TotalEmployeeDonut() {
           <span className="text-[32px] font-bold leading-none text-foreground">
             {formatNumber(totalEmployeeCount)}
           </span>
-          <span className="mt-1 text-xs text-muted">Total</span>
+          <span className="mt-1 text-xs text-muted">
+            {totalEmployeeCount === 1 ? 'Transação' : 'Transações'}
+          </span>
         </div>
       </div>
 

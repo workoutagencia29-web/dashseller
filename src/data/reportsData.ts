@@ -29,6 +29,12 @@ export const clients: Client[] = [
   { id: 8, name: 'Thiago Nunes', email: 'thiago.nunes@email.com', document: '23.456.789/0001-01', avatarSeed: 60 },
   { id: 9, name: 'Juliana Dias', email: 'juliana.dias@email.com', document: '147.258.369-55', avatarSeed: 33 },
   { id: 10, name: 'André Pereira', email: 'andre.pereira@email.com', document: '258.369.147-66', avatarSeed: 14 },
+  { id: 11, name: 'Fernanda Castro', email: 'fernanda.castro@email.com', document: '369.147.258-77', avatarSeed: 22 },
+  { id: 12, name: 'Lucas Oliveira', email: 'lucas.oliveira@email.com', document: '741.852.963-88', avatarSeed: 44 },
+  { id: 13, name: 'Isabela Ferreira', email: 'isabela.ferreira@email.com', document: '34.567.890/0001-12', avatarSeed: 7 },
+  { id: 14, name: 'Gustavo Ribeiro', email: 'gustavo.ribeiro@email.com', document: '852.963.741-99', avatarSeed: 38 },
+  { id: 15, name: 'Amanda Cardoso', email: 'amanda.cardoso@email.com', document: '963.741.852-00', avatarSeed: 55 },
+  { id: 16, name: 'Felipe Mendes', email: 'felipe.mendes@email.com', document: '45.678.901/0001-23', avatarSeed: 19 },
 ]
 
 /* ------------------------------ Entradas ------------------------------ */
@@ -132,16 +138,20 @@ function buildSaidas(): Saida[] {
     const date = addDays(today, -dayBack)
     date.setHours(Math.floor(seeded(i + 6) * 12) + 8, Math.floor(seeded(i + 8) * 60), 0, 0)
     const needsMotivo = type === 'Multa' || type === 'MED' || type === 'Chargeback'
+    // quando a saída vai pra um banco (Cashout/Retirada), o destinatário É o banco —
+    // então o campo "Banco" do detalhe usa o mesmo banco, evitando contradição
+    const isBank = type === 'Cashout' || type === 'Retirada Manual'
+    const recipient = isBank ? pick(banks, i + 1) : `Sub-seller #${i + 100}`
     out.push({
       id: i + 1,
       date,
-      recipient: type === 'Cashout' || type === 'Retirada Manual' ? pick(banks, i + 1) : `Sub-seller #${i + 100}`,
+      recipient,
       valorBruto: bruto,
       valorLiquido: Math.round((bruto - fee) * 100) / 100,
       status: pick(saidaStatuses, i * 2 + 1),
       type,
       txId: `OUT${(551200 + i * 211).toString().slice(0, 7)}`,
-      bank: pick(banks, i + 3),
+      bank: isBank ? recipient : pick(banks, i + 3),
       agency: `${1000 + Math.floor(seeded(i) * 8999)}`,
       account: `${10000 + Math.floor(seeded(i + 2) * 89999)}-${Math.floor(seeded(i + 3) * 9)}`,
       accountType: seeded(i) > 0.5 ? 'Corrente' : 'Poupança',

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Download } from 'lucide-react'
 import { saidas, type Saida } from '../../data/reportsData'
 import { DateRangeFilter } from '../ui/DateRangeFilter'
@@ -17,7 +17,11 @@ import {
   DrawerSection,
   Timeline,
   downloadCsv,
+  Pagination,
+  GhostRows,
 } from './reportsPrimitives'
+
+const PER_PAGE = 10
 
 const STATUSES = ['Aprovado', 'Em Análise', 'Cancelado']
 const TYPES = ['Cashout', 'Multa', 'Retirada Manual', 'MED', 'Chargeback']
@@ -50,6 +54,7 @@ export function SaidasTab() {
   const [search, setSearch] = useState('')
   const [tick, setTick] = useState(0)
   const [selected, setSelected] = useState<Saida | null>(null)
+  const [page, setPage] = useState(1)
 
   const start = useMemo(() => addDays(startOfDay(new Date()), -60), [])
   const range = useMemo(
@@ -69,18 +74,23 @@ export function SaidasTab() {
     })
   }, [range, status, types, search])
 
+  // paginação: 10 por página
+  const totalPages = Math.max(1, Math.ceil(rows.length / PER_PAGE))
+  const safePage = Math.min(page, totalPages)
+  const paged = rows.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
+  useEffect(() => setPage(1), [rows])
+
   function exportCsv() {
     downloadCsv(
       'saidas.csv',
-      ['Data', 'Destinatário', 'Valor Bruto', 'Valor Líquido', 'Status', 'Tipo', 'ID'],
+      ['Destinatário', 'Data', 'ID', 'Método', 'Status', 'Valor'],
       rows.map((s) => [
-        fmtDateTime(s.date),
         s.recipient,
-        s.valorBruto.toFixed(2),
-        s.valorLiquido.toFixed(2),
-        s.status,
-        s.type,
+        fmtDateTime(s.date),
         s.txId,
+        s.pixKey ? 'Pix' : 'TED',
+        s.status,
+        s.valorLiquido.toFixed(2),
       ]),
     )
   }
@@ -107,25 +117,25 @@ export function SaidasTab() {
 
       {/* tabela */}
       <div className="scrollbar-thin mt-5 overflow-x-auto">
-        <table className="w-full min-w-[920px] border-collapse text-sm">
+        <table className="w-full min-w-[920px] table-fixed border-collapse text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
-              <th className="py-3 pr-3 font-semibold">Data</th>
-              <th className="px-3 py-3 font-semibold">Destinatário</th>
-              <th className="px-3 py-3 font-semibold">Valor</th>
+              <th className="py-3 pr-3 font-semibold">Destinatário</th>
+              <th className="px-3 py-3 font-semibold">Data</th>
+              <th className="px-3 py-3 font-semibold">Método</th>
               <th className="px-3 py-3 font-semibold">Status</th>
-              <th className="px-3 py-3 font-semibold">ID</th>
+              <th className="px-3 py-3 font-semibold">Valor</th>
               <th className="py-3 pl-3 font-semibold">Detalhes</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((s) => (
+            {paged.map((s) => (
               <tr key={s.id} className="border-b border-border/60 transition-colors last:border-0 hover:bg-card-muted/40">
-                <td className="whitespace-nowrap py-3.5 pr-3 text-muted">{fmtDateTime(s.date)}</td>
-                <td className="whitespace-nowrap px-3 py-3.5 font-medium text-foreground">{s.recipient}</td>
-                <td className="whitespace-nowrap px-3 py-3.5 font-semibold text-foreground">{formatCurrency(s.valorLiquido)}</td>
+                <td className="whitespace-nowrap py-3.5 pr-3 font-medium text-foreground">{s.recipient}</td>
+                <td className="whitespace-nowrap px-3 py-3.5 text-muted">{s.date.toLocaleDateString('pt-BR')}</td>
+                <td className="whitespace-nowrap px-3 py-3.5 text-muted">{s.pixKey ? 'Pix' : 'TED'}</td>
                 <td className="px-3 py-3.5"><StatusBadge status={s.status} /></td>
-                <td className="whitespace-nowrap px-3 py-3.5 font-mono text-[13px] text-muted">{s.txId}</td>
+                <td className="whitespace-nowrap px-3 py-3.5 font-semibold text-foreground">{formatCurrency(s.valorLiquido)}</td>
                 <td className="py-3.5 pl-3">
                   <button onClick={() => setSelected(s)} className="rounded-lg border border-border px-3 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary">
                     Ver
@@ -133,13 +143,16 @@ export function SaidasTab() {
                 </td>
               </tr>
             ))}
+            <GhostRows count={paged.length === 0 ? 0 : PER_PAGE - paged.length} colSpan={6} />
           </tbody>
         </table>
         {rows.length === 0 && <p className="py-12 text-center text-sm text-muted">Nenhuma saída encontrada para os filtros atuais.</p>}
       </div>
 
+      <Pagination page={safePage} totalPages={totalPages} onChange={setPage} />
+
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-sm text-muted">
-        <span><span className="font-semibold text-foreground">{rows.length}</span> saída(s)</span>
+        <span><span className="font-semibold text-foreground">{rows.length}</span> saída(s) no período</span>
         <span>Líquido aprovado: <span className="font-semibold text-foreground">{formatCurrency(totalLiquido)}</span></span>
       </div>
 
@@ -169,6 +182,7 @@ export function SaidasTab() {
 
             <DrawerSection title="Destino">
               <DetailRow label="Destinatário" value={selected.recipient} />
+              <DetailRow label="Método" value={selected.pixKey ? 'Pix' : 'TED'} />
               <DetailRow label="Banco" value={selected.bank} />
               <DetailRow label="Agência" value={selected.agency} />
               <DetailRow label="Conta" value={`${selected.account} (${selected.accountType})`} />

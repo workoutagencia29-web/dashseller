@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { NavLink } from 'react-router-dom'
-import { ChevronDown, Check, Search, X, FileText, FileDown, FileArchive, RefreshCw } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Check, Search, X, FileText, FileDown, FileArchive, RefreshCw, MoreVertical, type LucideIcon } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Badge, Button } from '../settings/primitives'
 
@@ -138,6 +139,10 @@ const statusTone: Record<string, Parameters<typeof Badge>[0]['tone']> = {
   Estornado: 'neutral',
   Bloqueado: 'danger',
   Chargeback: 'danger',
+  // Afiliados (gerenciador)
+  Ativo: 'success',
+  'Convite enviado': 'info',
+  Pausado: 'neutral',
   Cancelado: 'danger',
   Cancelada: 'danger',
   // Financeiro
@@ -164,20 +169,40 @@ export function TypeBadge({ type }: { type: string }) {
 
 /* ------------------------------ Drawer -------------------------------- */
 
-export function Drawer({ open, title, onClose, children, footer }: { open: boolean; title: string; onClose: () => void; children: ReactNode; footer?: ReactNode }) {
+export function Drawer({ open, title, onClose, children, footer, widthClass = 'max-w-md' }: { open: boolean; title: string; onClose: () => void; children: ReactNode; footer?: ReactNode; widthClass?: string }) {
   useEffect(() => {
+    if (!open) return
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
     }
-    if (open) document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
+    document.addEventListener('keydown', onKey)
+
+    // trava a rolagem do fundo (main + html) enquanto o drawer está aberto,
+    // matando também o bounce/overscroll do documento sobre o backdrop
+    const main = document.querySelector('main')
+    const html = document.documentElement
+    const prev = {
+      mainOverflow: main?.style.overflow ?? '',
+      htmlOverflow: html.style.overflow,
+      htmlOverscroll: html.style.overscrollBehavior,
+    }
+    if (main) main.style.overflow = 'hidden'
+    html.style.overflow = 'hidden'
+    html.style.overscrollBehavior = 'none'
+
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      if (main) main.style.overflow = prev.mainOverflow
+      html.style.overflow = prev.htmlOverflow
+      html.style.overscrollBehavior = prev.htmlOverscroll
+    }
   }, [open, onClose])
 
   if (!open) return null
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose} />
-      <div className="scrollbar-thin absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-border bg-card shadow-2xl animate-fade-in">
+      <div className={cn('scrollbar-thin absolute right-0 top-0 flex h-full w-full flex-col border-l border-border bg-card shadow-2xl animate-fade-in', widthClass)}>
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h3 className="text-lg font-bold text-foreground">{title}</h3>
           <button onClick={onClose} className="rounded-lg p-1 text-muted hover:bg-card-muted hover:text-foreground" aria-label="Fechar">
@@ -187,7 +212,8 @@ export function Drawer({ open, title, onClose, children, footer }: { open: boole
         <div className="scrollbar-thin flex-1 overflow-y-auto p-6">{children}</div>
         {footer && <div className="border-t border-border p-4">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -201,12 +227,186 @@ export function DetailRow({ label, value }: { label: string; value: ReactNode })
   )
 }
 
+/* ----------------------------- Paginação ----------------------------- */
+
+/** Controle de páginas (‹ 1 2 3 ›) — some quando há só 1 página. */
+export function Pagination({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (n: number) => void }) {
+  if (totalPages <= 1) return null
+  return (
+    <div className="mt-6 flex items-center justify-center gap-1.5">
+      <button
+        onClick={() => onChange(Math.max(1, page - 1))}
+        disabled={page === 1}
+        aria-label="Página anterior"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-card-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+        <button
+          key={n}
+          onClick={() => onChange(n)}
+          className={cn(
+            'inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-2 text-sm font-semibold transition-colors',
+            n === page ? 'bg-primary/10 text-primary' : 'text-muted hover:bg-card-muted hover:text-foreground',
+          )}
+        >
+          {n}
+        </button>
+      ))}
+      <button
+        onClick={() => onChange(Math.min(totalPages, page + 1))}
+        disabled={page === totalPages}
+        aria-label="Próxima página"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-card-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  )
+}
+
+/**
+ * Linhas-fantasma (invisíveis) que preenchem os slots vazios da página,
+ * mantendo a altura do card fixa independente de quantos itens a página tem.
+ */
+export function GhostRows({ count, colSpan, rowClassName }: { count: number; colSpan: number; rowClassName?: string }) {
+  if (count <= 0) return null
+  return (
+    <>
+      {Array.from({ length: count }).map((_, i) => (
+        <tr key={`ghost-${i}`} aria-hidden className={cn('border-b border-transparent', rowClassName)}>
+          <td className="py-3.5 pr-3" colSpan={colSpan}>
+            <span className="invisible inline-flex items-center border px-3 py-1.5 text-[13px]">Ver</span>
+          </td>
+        </tr>
+      ))}
+    </>
+  )
+}
+
 export function DrawerSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="mb-6 last:mb-0">
       <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-faint">{title}</h4>
       {children}
     </div>
+  )
+}
+
+/* ---------------------------- ActionMenu ------------------------------ */
+
+export interface ActionMenuItem {
+  label: string
+  icon?: LucideIcon
+  onClick: () => void
+  /** Estilo destrutivo (vermelho). */
+  danger?: boolean
+  /** Desenha um divisor acima deste item. */
+  separatorBefore?: boolean
+}
+
+/**
+ * Menu de ações por linha (•••). Renderizado via portal com posição fixa
+ * ancorada no botão — assim não é cortado pelo overflow da tabela e abre pra
+ * cima quando não há espaço embaixo.
+ */
+export function ActionMenu({ items, label = 'Ações' }: { items: ActionMenuItem[]; label?: string }) {
+  const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const MENU_W = 226
+
+  function place() {
+    const el = btnRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const left = Math.max(8, Math.min(r.right - MENU_W, window.innerWidth - MENU_W - 8))
+    const estH = items.length * 40 + 16
+    const top = r.bottom + 6 + estH > window.innerHeight - 8 ? Math.max(8, r.top - 6 - estH) : r.bottom + 6
+    setPos({ top, left })
+  }
+
+  function toggle() {
+    if (!open) place()
+    setOpen((o) => !o)
+  }
+
+  useEffect(() => {
+    if (!open) return
+    function onDown(e: MouseEvent) {
+      const t = e.target as Node
+      if (btnRef.current?.contains(t) || menuRef.current?.contains(t)) return
+      setOpen(false)
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    function onReflow() {
+      setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    window.addEventListener('resize', onReflow)
+    window.addEventListener('scroll', onReflow, true)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+      window.removeEventListener('resize', onReflow)
+      window.removeEventListener('scroll', onReflow, true)
+    }
+  }, [open])
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={toggle}
+        aria-label={label}
+        aria-haspopup="menu"
+        className={cn(
+          'inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-card-muted hover:text-foreground',
+          open && 'bg-card-muted text-foreground',
+        )}
+      >
+        <MoreVertical className="h-4 w-4" />
+      </button>
+
+      {open &&
+        pos &&
+        createPortal(
+          <div
+            ref={menuRef}
+            role="menu"
+            style={{ position: 'fixed', top: pos.top, left: pos.left, width: MENU_W }}
+            className="z-[70] overflow-hidden rounded-xl border border-border bg-card p-1.5 shadow-xl shadow-black/30 animate-fade-in"
+          >
+            {items.map((it) => (
+              <Fragment key={it.label}>
+                {it.separatorBefore && <div className="my-1 border-t border-border" />}
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setOpen(false)
+                    it.onClick()
+                  }}
+                  className={cn(
+                    'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors',
+                    it.danger ? 'text-negative hover:bg-negative/10' : 'text-foreground hover:bg-card-muted',
+                  )}
+                >
+                  {it.icon && <it.icon className="h-4 w-4 shrink-0" />}
+                  {it.label}
+                </button>
+              </Fragment>
+            ))}
+          </div>,
+          document.body,
+        )}
+    </>
   )
 }
 

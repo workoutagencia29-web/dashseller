@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Settings from './pages/Settings'
+import Conta from './pages/Conta'
 import ClienteDetalhe from './pages/ClienteDetalhe'
 import { ReportsLayout } from './components/reports/ReportsLayout'
 import { ClientesTab } from './components/reports/ClientesTab'
@@ -15,19 +16,20 @@ import { LinkPagamentoTab } from './components/financeiro/LinkPagamentoTab'
 import { ContestacoesTab } from './components/financeiro/ContestacoesTab'
 import { TaxasTab } from './components/financeiro/TaxasTab'
 import Webhooks from './pages/Webhooks'
-import ConvidarColaborador from './pages/ConvidarColaborador'
-import Permissoes from './pages/Permissoes'
-import Logs from './pages/Logs'
-import Colaboradores from './pages/Colaboradores'
+import ConfigDominio from './pages/ConfigDominio'
+import MeusDominios from './pages/MeusDominios'
+import GerenciadorAfiliados from './pages/GerenciadorAfiliados'
+import MeusAfiliados from './pages/MeusAfiliados'
 import { Placeholder } from './pages/Placeholder'
 import { navItems } from './data/mockData'
 
 /** Sub-rotas com página própria — não geram placeholder automático. */
 const EXPLICIT_CHILD_PATHS = new Set([
-  '/equipe/convidar-colaborador',
-  '/equipe/colaboradores',
-  '/equipe/permissoes',
-  '/equipe/logs',
+  '/produto/config-dominio',
+  '/produto/meus-dominios',
+  '/afiliados/gerenciador',
+  '/afiliados/meus-afiliados',
+  '/integracoes/webhooks',
 ])
 
 export default function App() {
@@ -36,6 +38,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/configuracoes" element={<Settings />} />
+        <Route path="/conta" element={<Conta />} />
 
         {/* Relatórios — abas reais */}
         <Route element={<ReportsLayout />}>
@@ -55,18 +58,20 @@ export default function App() {
         </Route>
         <Route path="/financeiro/assinaturas/:id" element={<AssinaturaDetalhe />} />
 
+        {/* Produto — domínios do checkout */}
+        <Route path="/produto/config-dominio" element={<ConfigDominio />} />
+        <Route path="/produto/meus-dominios" element={<MeusDominios />} />
+
+        {/* Afiliados */}
+        <Route path="/afiliados/gerenciador" element={<GerenciadorAfiliados />} />
+        <Route path="/afiliados/meus-afiliados" element={<MeusAfiliados />} />
+
         {/* Integrações — Webhooks (movido das Configurações) */}
         <Route path="/integracoes/webhooks" element={<Webhooks />} />
 
-        {/* Equipe — páginas reais */}
-        <Route path="/equipe/convidar-colaborador" element={<ConvidarColaborador />} />
-        <Route path="/equipe/colaboradores" element={<Colaboradores />} />
-        <Route path="/equipe/permissoes" element={<Permissoes />} />
-        <Route path="/equipe/logs" element={<Logs />} />
-
         {/* Telas em construção — geradas a partir do menu */}
         {navItems.flatMap((item) => {
-          if (item.label === 'Relatório' || item.label === 'Financeiro' || item.label === 'Integrações') return []
+          if (item.label === 'Relatório' || item.label === 'Financeiro') return []
           if (item.children) {
             return item.children
               .filter((child) => !EXPLICIT_CHILD_PATHS.has(child.path))

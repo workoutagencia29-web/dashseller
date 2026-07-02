@@ -3,9 +3,10 @@ import {
   FileText,
   Wallet,
   Package,
-  Users,
+  Handshake,
   Store,
-  Plug,
+  Trophy,
+  Wrench,
   type LucideIcon,
 } from 'lucide-react'
 import { startOfDay, addDays } from '../lib/date'
@@ -57,26 +58,28 @@ export const navItems: NavItem[] = [
     icon: Package,
     children: [
       { label: 'Meus Produtos', path: '/produto/meus-produtos' },
-      { label: 'Coprodução', path: '/produto/coproducao' },
       { label: 'Config. domínio', path: '/produto/config-dominio' },
-      { label: 'Meus Afiliados', path: '/produto/meus-afiliados' },
+      { label: 'Meus domínios', path: '/produto/meus-dominios' },
     ],
   },
   {
-    label: 'Equipe',
-    icon: Users,
+    label: 'Afiliados',
+    icon: Handshake,
     children: [
-      { label: 'Convidar Colaborador', path: '/equipe/convidar-colaborador' },
-      { label: 'Colaboradores', path: '/equipe/colaboradores' },
-      { label: 'Logs', path: '/equipe/logs' },
-      { label: 'Permissões', path: '/equipe/permissoes' },
+      { label: 'Gerenciador de afiliados', path: '/afiliados/gerenciador' },
+      { label: 'Meus Afiliados', path: '/afiliados/meus-afiliados' },
     ],
   },
   { label: 'Marketplace', icon: Store, disabled: true, badge: 'Em Breve' },
+  { label: 'Premiações', icon: Trophy, disabled: true, badge: 'Em Breve' },
   {
-    label: 'Integrações',
-    icon: Plug,
-    children: [{ label: 'Webhooks', path: '/integracoes/webhooks' }],
+    label: 'Ferramentas',
+    icon: Wrench,
+    children: [
+      { label: 'Webhooks', path: '/integracoes/webhooks' },
+      { label: 'Chaves de API', path: '/integracoes/chaves-de-api' },
+      { label: 'Integrações', path: '/integracoes/conexoes' },
+    ],
   },
 ]
 

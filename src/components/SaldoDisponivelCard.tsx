@@ -39,20 +39,14 @@ export function SaldoDisponivelCard({ className }: { className?: string }) {
         }}
       />
 
-      {/* topo: label + valor + logo */}
-      <div className="relative z-10 flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-white/80">
-            Meu saldo disponível
-          </p>
-          <p className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            {formatCurrency(saldo)}
-          </p>
-        </div>
-        {/* logo "N" da Nummo */}
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-2xl font-extrabold text-white ring-1 ring-white/20 backdrop-blur-sm">
-          N
-        </div>
+      {/* topo: label + valor */}
+      <div className="relative z-10">
+        <p className="text-sm font-semibold uppercase tracking-wider text-white/80">
+          Meu saldo disponível
+        </p>
+        <p className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+          {formatCurrency(saldo)}
+        </p>
       </div>
 
       {/* botão de saque */}

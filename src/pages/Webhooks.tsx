@@ -7,7 +7,7 @@ export default function Webhooks() {
   const { onOpenMobile } = useOutletContext<LayoutContext>()
   return (
     <>
-      <Header title="Integrações" subtitle="Conecte a Nummo aos seus sistemas." onOpenMobile={onOpenMobile} />
+      <Header title="Ferramentas" subtitle="Conecte a Nummo aos seus sistemas." onOpenMobile={onOpenMobile} />
       <WebhooksSection />
     </>
   )

@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
 import { cn } from '../../lib/utils'
 
 /* ------------------------------- Card -------------------------------- */
@@ -78,6 +78,10 @@ export function Select({ className, children, ...props }: SelectHTMLAttributes<H
       {children}
     </select>
   )
+}
+
+export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea className={cn(inputBase, 'min-h-[84px] resize-y leading-relaxed', className)} {...props} />
 }
 
 /* ------------------------------ Button ------------------------------- */

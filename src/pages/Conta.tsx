@@ -1,33 +1,23 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Building2, Landmark, Bell, BellRing, ArrowLeft } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { User, ShieldCheck, ArrowLeft } from 'lucide-react'
 import { cn } from '../lib/utils'
-import { PersonalNotificationsSection } from '../components/settings/ProfileSections'
-import { CompanySection, BankSection, AccountNotificationsSection } from '../components/settings/AccountSections'
+import { ProfileSection, SecuritySection } from '../components/settings/ProfileSections'
 
 const NAV = [
   {
-    group: 'Conta do seller',
+    group: 'Perfil do Usuário',
     items: [
-      { id: 'empresa', label: 'Empresa', icon: Building2 },
-      { id: 'bancario', label: 'Dados Bancários', icon: Landmark },
-    ],
-  },
-  {
-    group: 'Notificações',
-    items: [
-      { id: 'notif-pessoais', label: 'Notificações Pessoais', icon: Bell },
-      { id: 'notif-conta', label: 'Notificações da Conta', icon: BellRing },
+      { id: 'perfil', label: 'Dados Pessoais', icon: User },
+      { id: 'seguranca', label: 'Segurança', icon: ShieldCheck },
     ],
   },
 ]
 
 const ALL_IDS = NAV.flatMap((g) => g.items.map((i) => i.id))
 
-export default function Settings() {
+export default function Conta() {
   const [activeId, setActiveId] = useState(ALL_IDS[0])
-  const location = useLocation()
-  const navigate = useNavigate()
 
   useEffect(() => {
     const scroller = document.querySelector('main')
@@ -67,18 +57,6 @@ export default function Settings() {
     }
   }, [])
 
-  // veio do menu do avatar (Notificações) → abre a Configurações já na seção de notificações
-  useEffect(() => {
-    const target = (location.state as { scrollTo?: string } | null)?.scrollTo
-    if (!target) return
-    const t = setTimeout(() => {
-      document.getElementById(target)?.scrollIntoView({ behavior: 'auto', block: 'start' })
-      setActiveId(target)
-      navigate(location.pathname, { replace: true, state: null }) // limpa pra não repetir
-    }, 60)
-    return () => clearTimeout(t)
-  }, [location.state, location.pathname, navigate])
-
   function goTo(id: string) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
@@ -90,8 +68,8 @@ export default function Settings() {
         <div className="scrollbar-thin flex h-full flex-col lg:overflow-y-auto">
           {/* título dentro do rail */}
           <div className="mb-6">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-[26px]">Configurações</h1>
-            <p className="mt-1 text-sm text-muted">Gerencie as configurações do seu negócio.</p>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-[26px]">Conta</h1>
+            <p className="mt-1 text-sm text-muted">Seus dados e preferências.</p>
           </div>
 
           {/* índice */}
@@ -138,10 +116,8 @@ export default function Settings() {
 
       {/* CONTEÚDO que rola */}
       <div className="min-w-0 space-y-6">
-        <CompanySection />
-        <BankSection />
-        <PersonalNotificationsSection />
-        <AccountNotificationsSection />
+        <ProfileSection />
+        <SecuritySection />
       </div>
     </div>
   )

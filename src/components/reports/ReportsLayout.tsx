@@ -7,7 +7,7 @@ export function ReportsLayout() {
   const { onOpenMobile } = useOutletContext<LayoutContext>()
   return (
     <>
-      <Header title="Relatórios" subtitle="Clientes, entradas e saídas da sua conta." onOpenMobile={onOpenMobile} />
+      <Header title="Relatórios" subtitle="Clientes, entradas e saídas do seu negócio." onOpenMobile={onOpenMobile} />
       <ReportTabs />
       <Outlet />
     </>

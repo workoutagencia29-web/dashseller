@@ -10,8 +10,6 @@ import {
   Check,
   Eye,
   EyeOff,
-  Mail,
-  MessageSquare,
 } from 'lucide-react'
 import { Avatar } from '../ui/Avatar'
 import {
@@ -29,7 +27,6 @@ import { cn } from '../../lib/utils'
 import {
   activeSessions,
   personalNotifEvents,
-  personalNotifChannels,
 } from '../../data/settingsData'
 
 /* ------------------------- Dados Pessoais ----------------------------- */
@@ -78,7 +75,7 @@ export function ProfileSection() {
         <Field label="Nome completo">
           <Input defaultValue="Pristia Candra" placeholder="Seu nome" />
         </Field>
-        <Field label="E-mail" hint="Ao alterar, enviamos um link de confirmação para o novo e-mail.">
+        <Field label="E-mail">
           <Input type="email" defaultValue="pristia@nummo.com" />
         </Field>
         <Field label="Telefone / WhatsApp">
@@ -136,7 +133,8 @@ function PasswordInput({ placeholder, label }: { placeholder: string; label: str
 
 export function SecuritySection() {
   const [twoFA, setTwoFA] = useState(true)
-  const [method, setMethod] = useState<'app' | 'sms'>('app')
+  // nenhum método pré-selecionado; ao ativar o 2FA o usuário escolhe
+  const [method, setMethod] = useState<'app' | 'sms' | null>(null)
 
   return (
     <SettingsCard id="seguranca" title="Segurança" description="Senha, verificação em duas etapas e sessões.">
@@ -167,37 +165,46 @@ export function SecuritySection() {
                 </p>
               </div>
             </div>
-            <Switch checked={twoFA} onChange={setTwoFA} />
+            <Switch
+              checked={twoFA}
+              onChange={(v) => {
+                setTwoFA(v)
+                if (!v) setMethod(null) // ao desligar, esquece o método (religar começa sem seleção)
+              }}
+            />
           </div>
 
-          {twoFA && (
-            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {(
-                [
-                  { id: 'app', label: 'App autenticador', desc: 'Google Authenticator, Authy…', icon: ShieldCheck },
-                  { id: 'sms', label: 'SMS', desc: 'Código enviado por mensagem', icon: Smartphone },
-                ] as const
-              ).map((opt) => (
+          {/* sempre visível; com o 2FA desativado fica esmaecido e sem clique */}
+          <div className={cn('mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2', !twoFA && 'opacity-40')}>
+            {(
+              [
+                { id: 'app', label: 'App autenticador', desc: 'Google Authenticator, Authy…', icon: ShieldCheck },
+                { id: 'sms', label: 'SMS', desc: 'Código enviado por mensagem', icon: Smartphone },
+              ] as const
+            ).map((opt) => {
+              // só conta como selecionado quando o 2FA está ativo
+              const isSelected = twoFA && method === opt.id
+              return (
                 <button
                   key={opt.id}
                   onClick={() => setMethod(opt.id)}
+                  disabled={!twoFA}
                   className={cn(
-                    'flex items-center gap-3 rounded-2xl border p-4 text-left transition-colors',
-                    method === opt.id
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:bg-card-muted/50',
+                    'flex items-center gap-3 rounded-2xl border p-4 text-left transition-colors disabled:cursor-not-allowed',
+                    isSelected ? 'border-primary bg-primary/5' : 'border-border',
+                    twoFA && !isSelected && 'hover:bg-card-muted/50',
                   )}
                 >
-                  <opt.icon className={cn('h-5 w-5', method === opt.id ? 'text-primary' : 'text-muted')} />
+                  <opt.icon className={cn('h-5 w-5', isSelected ? 'text-primary' : 'text-muted')} />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-foreground">{opt.label}</p>
                     <p className="text-xs text-muted">{opt.desc}</p>
                   </div>
-                  {method === opt.id && <Check className="h-4 w-4 text-primary" />}
+                  {isSelected && <Check className="h-4 w-4 text-primary" />}
                 </button>
-              ))}
-            </div>
-          )}
+              )
+            })}
+          </div>
         </SubBlock>
 
         {/* sessões */}
@@ -251,67 +258,84 @@ export function SecuritySection() {
 
 /* --------------------- Notificações Pessoais -------------------------- */
 
-const channelIcons: Record<string, typeof Mail> = {
-  'E-mail': Mail,
-  SMS: Smartphone,
-  WhatsApp: MessageSquare,
-  'Push web': Monitor,
+const VALOR_OPTS = ['Total', 'Comissão', 'Esconder'] as const
+const NOME_OPTS = ['Mostrar', 'Abreviar', 'Esconder'] as const
+type ValorOpt = (typeof VALOR_OPTS)[number]
+type NomeOpt = (typeof NOME_OPTS)[number]
+
+/** Seletor segmentado (2–3 opções) no estilo do sistema. */
+function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: readonly T[]
+  value: T
+  onChange: (v: T) => void
+}) {
+  return (
+    <div className="flex w-full rounded-xl border border-border bg-card-muted/40 p-1 text-sm sm:w-[300px]">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          type="button"
+          onClick={() => onChange(opt)}
+          className={cn(
+            'flex-1 rounded-lg px-3 py-1.5 text-center font-medium transition-colors',
+            value === opt ? 'bg-card text-foreground shadow-sm' : 'text-muted hover:text-foreground',
+          )}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  )
 }
 
 export function PersonalNotificationsSection() {
-  // matriz evento × canal
-  const [matrix, setMatrix] = useState<boolean[][]>(
-    personalNotifEvents.map((_, i) =>
-      personalNotifChannels.map((_, j) => (i + j) % 3 !== 0),
-    ),
+  // um liga/desliga por evento
+  const [enabled, setEnabled] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(personalNotifEvents.map((e) => [e.key, true] as [string, boolean])),
   )
-
-  function toggle(i: number, j: number) {
-    setMatrix((m) => m.map((row, ri) => (ri === i ? row.map((c, ci) => (ci === j ? !c : c)) : row)))
-  }
+  // configuração global — vale para todas as notificações
+  const [valorVenda, setValorVenda] = useState<ValorOpt>('Total')
+  const [nomeProduto, setNomeProduto] = useState<NomeOpt>('Mostrar')
 
   return (
     <SettingsCard
       id="notif-pessoais"
-      title="Notificações Pessoais"
-      description="Escolha por qual canal receber cada evento."
+      title="Notificações Pessoais (Push)"
+      description="Ative os eventos que você quer receber e defina o que aparece em cada notificação."
     >
-      <div className="scrollbar-thin overflow-x-auto">
-        <table className="w-full min-w-[560px] text-sm">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="py-3 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
-                Evento
-              </th>
-              {personalNotifChannels.map((ch) => {
-                const Icon = channelIcons[ch]
-                return (
-                  <th key={ch} className="px-3 py-3 text-center text-xs font-semibold text-muted">
-                    <span className="inline-flex flex-col items-center gap-1">
-                      <Icon className="h-4 w-4" />
-                      {ch}
-                    </span>
-                  </th>
-                )
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {personalNotifEvents.map((ev, i) => (
-              <tr key={ev} className="border-b border-border/60 last:border-0">
-                <td className="py-3.5 pr-3 font-medium text-foreground">{ev}</td>
-                {personalNotifChannels.map((_, j) => (
-                  <td key={j} className="px-3 py-3.5 text-center">
-                    <div className="flex justify-center">
-                      <Switch checked={matrix[i][j]} onChange={() => toggle(i, j)} />
-                    </div>
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* eventos — um botão de ativar/desativar por evento */}
+      <div className="divide-y divide-border">
+        {personalNotifEvents.map((ev) => (
+          <div key={ev.key} className="flex items-center justify-between gap-4 py-3.5 first:pt-0">
+            <span className="text-sm font-medium text-foreground">{ev.label}</span>
+            <Switch checked={enabled[ev.key]} onChange={(v) => setEnabled((s) => ({ ...s, [ev.key]: v }))} />
+          </div>
+        ))}
       </div>
+
+      {/* conteúdo da notificação — configuração global */}
+      <SubBlock title="Conteúdo da notificação">
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">Valor da venda</p>
+              <p className="mt-0.5 text-xs text-muted">O que exibir como valor na notificação.</p>
+            </div>
+            <Segmented options={VALOR_OPTS} value={valorVenda} onChange={setValorVenda} />
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">Nome do produto</p>
+              <p className="mt-0.5 text-xs text-muted">Mostrar ou ocultar o nome do produto.</p>
+            </div>
+            <Segmented options={NOME_OPTS} value={nomeProduto} onChange={setNomeProduto} />
+          </div>
+        </div>
+      </SubBlock>
     </SettingsCard>
   )
 }

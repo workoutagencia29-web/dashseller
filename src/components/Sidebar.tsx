@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronDown, ChevronsLeft, Settings, Sun, Moon } from 'lucide-react'
+import { ChevronDown, ChevronsLeft, Sun, Moon } from 'lucide-react'
 import { navItems, type NavItem } from '../data/mockData'
 import { cn } from '../lib/utils'
 import { useTheme } from '../context/ThemeContext'
+import { NummoWordmark, NummoMark } from './brand/NummoLogo'
 
 interface SidebarProps {
   collapsed: boolean
@@ -165,21 +166,23 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
         )}
       >
         {/* Brand */}
-        <div className={cn('flex h-[88px] items-center gap-3 px-5', collapsed && 'justify-center px-0')}>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-lg font-extrabold text-primary-foreground shadow-glow">
-            N
-          </div>
-          {!collapsed && (
-            <span className="flex-1 text-[20px] font-bold tracking-tight text-foreground">Nummo</span>
-          )}
-          {!collapsed && (
-            <button
-              onClick={onToggleCollapse}
-              className="hidden rounded-lg p-1.5 text-muted transition-colors hover:bg-card-muted hover:text-foreground lg:block"
-              aria-label="Recolher menu"
-            >
-              <ChevronsLeft className="h-5 w-5" />
-            </button>
+        <div className={cn('flex h-[88px] items-center', collapsed ? 'justify-center px-0' : 'pr-5')}>
+          {collapsed ? (
+            <NummoMark className="h-9 w-9 shrink-0" />
+          ) : (
+            <>
+              {/* logo centralizada entre a borda esquerda da sidebar e a setinha */}
+              <div className="flex flex-1 justify-center">
+                <NummoWordmark className="h-7 w-auto text-foreground" />
+              </div>
+              <button
+                onClick={onToggleCollapse}
+                className="hidden shrink-0 rounded-lg p-1.5 text-muted transition-colors hover:bg-card-muted hover:text-foreground lg:block"
+                aria-label="Recolher menu"
+              >
+                <ChevronsLeft className="h-5 w-5" />
+              </button>
+            </>
           )}
         </div>
 
@@ -199,23 +202,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
         </nav>
 
         {/* Footer */}
-        <div className="space-y-1 border-t border-border px-3 py-3">
-          <Link
-            to="/configuracoes"
-            onClick={onCloseMobile}
-            title={collapsed ? 'Configurações' : undefined}
-            className={cn(
-              'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
-              collapsed && 'justify-center px-0',
-              pathname === '/configuracoes'
-                ? 'bg-primary text-primary-foreground shadow-glow'
-                : 'text-muted hover:bg-card-muted hover:text-foreground',
-            )}
-          >
-            <Settings className="h-5 w-5 shrink-0" />
-            {!collapsed && <span className="flex-1 text-left">Configurações</span>}
-          </Link>
-
+        <div className="px-3 py-3">
           <ThemeToggle collapsed={collapsed} theme={theme} onSet={setTheme} />
         </div>
       </aside>

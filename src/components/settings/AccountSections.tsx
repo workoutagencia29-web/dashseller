@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Mails,
   Gavel,
+  Target,
 } from 'lucide-react'
 import { Avatar } from '../ui/Avatar'
 import {
@@ -191,7 +192,7 @@ export function BankSection() {
     <SettingsCard
       id="bancario"
       title="Dados Bancários"
-      description="Contas para liquidação. Ao adicionar uma conta, enviamos R$ 0,01 (ou micro-Pix) para confirmar a titularidade."
+      description="Contas para liquidação de valores."
       action={
         <Button
           size="sm"
@@ -240,6 +241,23 @@ export function BankSection() {
         {accounts.length === 0 && (
           <p className="py-6 text-center text-sm text-muted">Nenhuma conta cadastrada.</p>
         )}
+
+        {/* slots-fantasma: travam a altura do card em MAX_ACCOUNTS contas (não encolhe com 1 ou 2) */}
+        {Array.from({ length: MAX_ACCOUNTS - accounts.length }).map((_, i) => (
+          <div
+            key={`ghost-${i}`}
+            aria-hidden
+            className="invisible flex items-center gap-3 rounded-2xl border border-border bg-card-muted/30 p-4"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-card-muted">
+              <Landmark className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">—</p>
+              <p className="mt-0.5 text-xs">—</p>
+            </div>
+          </div>
+        ))}
       </div>
 
       <p className="mt-3 text-xs text-faint">
@@ -285,9 +303,6 @@ export function BankSection() {
             </Field>
             <Field label="Chave Pix"><Input placeholder="Sua chave" /></Field>
           </div>
-          <p className="rounded-xl bg-card-muted/50 px-3 py-2.5 text-xs text-muted">
-            Vamos enviar <span className="font-medium text-foreground">R$ 0,01</span> via Pix para confirmar a titularidade antes de liberar a conta.
-          </p>
           <div className="flex justify-end gap-2 pt-1">
             <Button variant="outline" size="sm" onClick={() => setOpen(false)}>Cancelar</Button>
             <Button size="sm" onClick={addAccount}>Adicionar conta</Button>
@@ -472,13 +487,22 @@ export function TeamSection() {
 /* --------------------- Notificações da Conta -------------------------- */
 
 export function AccountNotificationsSection() {
+  const [revenueGoal, setRevenueGoal] = useState(true)
   const [lowBalance, setLowBalance] = useState(true)
   const [chargeback, setChargeback] = useState(true)
   const [dispute, setDispute] = useState(false)
 
   return (
-    <SettingsCard id="notif-conta" title="Notificações da Conta" description="Alertas operacionais e financeiros do seller.">
+    <SettingsCard id="notif-conta" title="Notificações da Conta" description="Alertas que aparecem nas notificações dentro da dashboard.">
       <div className="-mb-3 divide-y divide-border">
+        <ToggleRow
+          icon={<Target className="h-5 w-5" />}
+          label="Aviso de meta de faturamento batido"
+          description="Receba um alerta conforme as metas de faturamento forem sendo atingidas."
+          checked={revenueGoal}
+          onChange={setRevenueGoal}
+        />
+
         <ToggleRow
           icon={<Wallet className="h-5 w-5" />}
           label="Alerta de saldo baixo"
@@ -497,7 +521,7 @@ export function AccountNotificationsSection() {
 
         <ToggleRow
           icon={<Gavel className="h-5 w-5" />}
-          label="Notificação de nova disputa"
+          label="Notificação de nova disputa (MED)"
           description="Seja avisado quando uma nova disputa for registrada."
           checked={dispute}
           onChange={setDispute}
