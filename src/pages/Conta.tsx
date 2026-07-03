@@ -72,8 +72,8 @@ export default function Conta() {
             <p className="mt-1 text-sm text-muted">Seus dados e preferências.</p>
           </div>
 
-          {/* índice */}
-          <nav className="space-y-5">
+          {/* índice — só no desktop; no mobile as seções ficam empilhadas e o índice some */}
+          <nav className="hidden space-y-5 lg:block">
             {NAV.map((group) => (
               <div key={group.group}>
                 <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wide text-faint">
@@ -106,7 +106,7 @@ export default function Conta() {
           {/* Voltar pro Dashboard (rodapé do rail) */}
           <Link
             to="/"
-            className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-sm font-semibold text-muted transition-colors hover:border-primary/40 hover:bg-card-muted hover:text-foreground lg:mt-auto"
+            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-sm font-semibold text-muted transition-colors hover:border-primary/40 hover:bg-card-muted hover:text-foreground lg:mt-auto"
           >
             <ArrowLeft className="h-4 w-4 shrink-0" />
             Voltar
