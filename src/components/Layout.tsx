@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { UserMenu } from './UserMenu'
 import { BottomNav } from './mobile/BottomNav'
+import { PullToRefresh } from './mobile/PullToRefresh'
+import { useIsMobile } from '../hooks/useIsMobile'
 import { cn } from '../lib/utils'
 
 /** Contexto passado às páginas via <Outlet> (ex: abrir o menu no mobile). */
@@ -14,6 +16,8 @@ export function Layout() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const { pathname } = useLocation()
+  const mainRef = useRef<HTMLElement>(null)
+  const isMobile = useIsMobile()
 
   // Páginas "focadas" (Configurações e Conta): a sidebar principal some — fica só o índice da própria página.
   const focused = pathname === '/configuracoes' || pathname === '/conta'
@@ -31,7 +35,11 @@ export function Layout() {
         away={focused}
       />
 
+      {/* pull-to-refresh — puxar pra baixo no topo recarrega (só mobile) */}
+      <PullToRefresh scrollRef={mainRef} enabled={isMobile} />
+
       <main
+        ref={mainRef}
         className={cn(
           // overscroll-none trava o bounce/rubber-band (não "pula" nem mostra espaço vazio) em todas as páginas
           // pb-24 no mobile reserva espaço pra bottom nav; no desktop (lg) não há barra, então pb-0
