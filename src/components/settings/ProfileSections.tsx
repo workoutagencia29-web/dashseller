@@ -24,6 +24,8 @@ import {
   maskPhone,
 } from './primitives'
 import { cn } from '../../lib/utils'
+import { downscaleImage } from '../../lib/image'
+import { useProfilePhoto, setProfilePhoto } from '../../data/profileStore'
 import {
   activeSessions,
   personalNotifEvents,
@@ -32,13 +34,31 @@ import {
 /* ------------------------- Dados Pessoais ----------------------------- */
 
 export function ProfileSection() {
-  const [photo, setPhoto] = useState<string | null>(null)
+  const savedPhoto = useProfilePhoto()
+  // draft: undefined = sem alteração pendente | null = remoção pendente | string = nova foto pendente
+  const [draft, setDraft] = useState<string | null | undefined>(undefined)
   const [phone, setPhone] = useState('(11) 98765-4321')
+  const [saved, setSaved] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+  const effective = draft === undefined ? savedPhoto : draft
+
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (file) setPhoto(URL.createObjectURL(file))
+    e.target.value = '' // permite reescolher o mesmo arquivo depois
+    if (!file) return
+    try {
+      setDraft(await downscaleImage(file, 400))
+    } catch {
+      setDraft(URL.createObjectURL(file)) // fallback: preview sem redimensionar
+    }
+  }
+
+  function handleSave() {
+    if (draft !== undefined) setProfilePhoto(draft) // aplica a foto no app todo (persiste)
+    setDraft(undefined)
+    setSaved(true)
+    window.setTimeout(() => setSaved(false), 2000)
   }
 
   return (
@@ -46,29 +66,45 @@ export function ProfileSection() {
       id="perfil"
       title="Dados Pessoais"
       description="Suas informações de perfil e preferências da conta."
-      action={<Button size="sm">Salvar alterações</Button>}
+      action={
+        <Button
+          size="sm"
+          type="button"
+          onClick={handleSave}
+          className={saved ? 'bg-emerald-500 text-white hover:opacity-90' : undefined}
+        >
+          {saved ? (
+            <>
+              <Check className="h-4 w-4" /> Salvo
+            </>
+          ) : (
+            'Salvar alterações'
+          )}
+        </Button>
+      }
     >
       {/* foto */}
       <div className="mb-6 flex flex-wrap items-center gap-5 border-b border-border pb-6">
-        {photo ? (
-          <img src={photo} alt="Foto de perfil" className="h-20 w-20 rounded-full object-cover ring-2 ring-border" />
+        {effective ? (
+          <img src={effective} alt="Foto de perfil" className="h-20 w-20 rounded-full object-cover ring-2 ring-border" />
         ) : (
           <Avatar name="Pedro Rossi" seed={31} size={80} />
         )}
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
+            <Button size="sm" variant="outline" type="button" onClick={() => fileRef.current?.click()}>
               <Camera className="h-4 w-4" /> Enviar foto
             </Button>
-            {photo && (
-              <Button size="sm" variant="ghost" onClick={() => setPhoto(null)}>
+            {effective && (
+              <Button size="sm" variant="ghost" type="button" onClick={() => setDraft(null)}>
                 <Trash2 className="h-4 w-4" /> Remover
               </Button>
             )}
           </div>
           <p className="text-xs text-muted">JPG ou PNG, até 2MB. Recomendado 400×400px.</p>
         </div>
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onPick} />
+        {/* sr-only (fora de tela) em vez de display:none — dispara mais confiável no mobile */}
+        <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={onPick} />
       </div>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">

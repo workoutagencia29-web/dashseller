@@ -15,6 +15,7 @@ import { Avatar } from '../components/ui/Avatar'
 import { useTheme } from '../context/ThemeContext'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useScrollCollapse } from '../hooks/useScrollCollapse'
+import { useProfilePhoto } from '../data/profileStore'
 import { cn } from '../lib/utils'
 
 /**
@@ -57,6 +58,7 @@ export default function Perfil() {
   const { theme, setTheme } = useTheme()
   const isMobile = useIsMobile()
   const collapsed = useScrollCollapse(16, isMobile)
+  const photo = useProfilePhoto()
 
   const conta: RowItem[] = [
     { label: 'Conta', icon: User, onClick: () => navigate('/conta') },
@@ -91,7 +93,7 @@ export default function Perfil() {
         onClick={() => navigate('/conta')}
         className="flex w-full items-center gap-4 rounded-3xl border border-border bg-card p-4 text-left transition-colors active:bg-card-muted"
       >
-        <Avatar name="Pedro Rossi" seed={31} size={60} />
+        <Avatar name="Pedro Rossi" seed={31} size={60} src={photo ?? undefined} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-lg font-bold text-foreground">Pedro Rossi</p>
           <p className="truncate text-sm text-muted">pedro@nummo.com</p>

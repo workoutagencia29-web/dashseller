@@ -16,6 +16,7 @@ import { stats } from '../../data/mockData'
 import { entradas, clients, type TxStatus } from '../../data/reportsData'
 import { cn, formatCurrency } from '../../lib/utils'
 import { useScrollCollapse } from '../../hooks/useScrollCollapse'
+import { useProfilePhoto } from '../../data/profileStore'
 import { Avatar } from '../ui/Avatar'
 import { NotificationsModal } from '../NotificationsModal'
 
@@ -23,6 +24,7 @@ import { NotificationsModal } from '../NotificationsModal'
 
 function TopBar({ collapsed, onSearch, onBell }: { collapsed: boolean; onSearch: () => void; onBell: () => void }) {
   const navigate = useNavigate()
+  const photo = useProfilePhoto()
   return (
     <div
       className={cn(
@@ -42,7 +44,7 @@ function TopBar({ collapsed, onSearch, onBell }: { collapsed: boolean; onSearch:
           collapsed && 'scale-[0.82]',
         )}
       >
-        <Avatar name="Pedro Rossi" seed={31} size={44} />
+        <Avatar name="Pedro Rossi" seed={31} size={44} src={photo ?? undefined} />
       </button>
 
       <div className="flex items-center gap-1.5">
