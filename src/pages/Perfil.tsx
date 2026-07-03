@@ -140,14 +140,11 @@ export default function Perfil() {
         </div>
       </div>
 
-      {/* ajuda */}
+      {/* ajuda — card compacto, sem rótulo (mesmo tamanho do card "Sair") */}
       <div className="overflow-hidden rounded-3xl border border-border bg-card">
-        <p className="px-4 pt-4 text-xs font-semibold uppercase tracking-wide text-faint">Ajuda</p>
-        <div className="mt-1 divide-y divide-border/60">
-          {ajuda.map((item) => (
-            <Row key={item.label} item={item} />
-          ))}
-        </div>
+        {ajuda.map((item) => (
+          <Row key={item.label} item={item} />
+        ))}
       </div>
 
       {/* logout */}
