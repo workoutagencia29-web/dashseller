@@ -13,6 +13,8 @@ import {
 } from 'lucide-react'
 import { Avatar } from '../components/ui/Avatar'
 import { useTheme } from '../context/ThemeContext'
+import { useIsMobile } from '../hooks/useIsMobile'
+import { useScrollCollapse } from '../hooks/useScrollCollapse'
 import { cn } from '../lib/utils'
 
 /**
@@ -53,6 +55,8 @@ function Row({ item }: { item: RowItem }) {
 export default function Perfil() {
   const navigate = useNavigate()
   const { theme, setTheme } = useTheme()
+  const isMobile = useIsMobile()
+  const collapsed = useScrollCollapse(16, isMobile)
 
   const conta: RowItem[] = [
     { label: 'Conta', icon: User, onClick: () => navigate('/conta') },
@@ -70,7 +74,16 @@ export default function Perfil() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight text-foreground">Perfil</h1>
+      <h1
+        className={cn(
+          'font-bold tracking-tight text-foreground',
+          isMobile && 'sticky top-0 z-20 -mx-5 px-5 transition-all duration-300 sm:-mx-8 sm:px-8',
+          isMobile && (collapsed ? 'border-b border-border bg-background/85 py-3 text-lg backdrop-blur-lg' : 'py-1 text-2xl'),
+          !isMobile && 'text-2xl',
+        )}
+      >
+        Perfil
+      </h1>
 
       {/* cartão do usuário */}
       <button

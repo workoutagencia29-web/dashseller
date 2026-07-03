@@ -15,20 +15,32 @@ import {
 import { stats } from '../../data/mockData'
 import { entradas, clients, type TxStatus } from '../../data/reportsData'
 import { cn, formatCurrency } from '../../lib/utils'
+import { useScrollCollapse } from '../../hooks/useScrollCollapse'
 import { Avatar } from '../ui/Avatar'
 import { NotificationsModal } from '../NotificationsModal'
 
 /* ----------------------------- topo (top bar) ------------------------- */
 
-function TopBar({ onSearch, onBell }: { onSearch: () => void; onBell: () => void }) {
+function TopBar({ collapsed, onSearch, onBell }: { collapsed: boolean; onSearch: () => void; onBell: () => void }) {
   const navigate = useNavigate()
   return (
-    <div className="flex items-center justify-between">
+    <div
+      className={cn(
+        // fixa no topo e encolhe ao rolar (sensação de app); -mx-5 estende o blur de ponta a ponta
+        'sticky top-0 z-30 -mx-5 flex items-center justify-between px-5 transition-all duration-300',
+        collapsed
+          ? 'border-b border-border bg-background/80 py-2.5 backdrop-blur-lg'
+          : 'border-b border-transparent py-1.5',
+      )}
+    >
       <button
         type="button"
         onClick={() => navigate('/perfil')}
         aria-label="Abrir perfil"
-        className="rounded-full transition-opacity active:opacity-80"
+        className={cn(
+          'origin-left rounded-full transition-transform duration-300 active:opacity-80',
+          collapsed && 'scale-[0.82]',
+        )}
       >
         <Avatar name="Pedro Rossi" seed={31} size={44} />
       </button>
@@ -247,6 +259,7 @@ function Toast({ msg }: { msg: string }) {
 export function MobileHome() {
   const [notifOpen, setNotifOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const collapsed = useScrollCollapse(16)
 
   function showSoon(label: string) {
     setToast(`${label} — em breve`)
@@ -255,7 +268,7 @@ export function MobileHome() {
 
   return (
     <div className="space-y-6 pb-2">
-      <TopBar onSearch={() => showSoon('Busca')} onBell={() => setNotifOpen(true)} />
+      <TopBar collapsed={collapsed} onSearch={() => showSoon('Busca')} onBell={() => setNotifOpen(true)} />
       <BalanceCard />
       <QuickActions onSoon={showSoon} />
       <RecentTransactions />
