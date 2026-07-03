@@ -103,7 +103,7 @@ function BalanceCard() {
             type="button"
             onClick={() => setHidden((h) => !h)}
             aria-label={hidden ? 'Mostrar saldo' : 'Ocultar saldo'}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 active:bg-white/10"
+            className="-my-1.5 -mr-2 flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 active:bg-white/10"
           >
             {hidden ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
           </button>
