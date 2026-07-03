@@ -18,7 +18,6 @@ import { TaxasTab } from './components/financeiro/TaxasTab'
 import Webhooks from './pages/Webhooks'
 import ChavesApi from './pages/ChavesApi'
 import Integracoes from './pages/Integracoes'
-import { FerramentasTabs } from './components/ferramentas/FerramentasTabs'
 import ConfigDominio from './pages/ConfigDominio'
 import MeusDominios from './pages/MeusDominios'
 import GerenciadorAfiliados from './pages/GerenciadorAfiliados'
@@ -74,13 +73,10 @@ export default function App() {
         <Route path="/afiliados/gerenciador" element={<GerenciadorAfiliados />} />
         <Route path="/afiliados/meus-afiliados" element={<MeusAfiliados />} />
 
-        {/* Webhooks — acessado pelo Perfil no mobile e pela sidebar no desktop; sem o switcher de Ferramentas */}
+        {/* Ferramentas — rotas diretas, sem switcher no mobile (Ferramentas abre em Chaves de API) */}
         <Route path="/integracoes/webhooks" element={<Webhooks />} />
-        {/* Ferramentas — Chaves/Integrações. No mobile ganham um switcher (FerramentasTabs); no desktop navega pela sidebar */}
-        <Route element={<FerramentasTabs />}>
-          <Route path="/integracoes/chaves-de-api" element={<ChavesApi />} />
-          <Route path="/integracoes/conexoes" element={<Integracoes />} />
-        </Route>
+        <Route path="/integracoes/chaves-de-api" element={<ChavesApi />} />
+        <Route path="/integracoes/conexoes" element={<Integracoes />} />
 
         {/* Telas em construção — geradas a partir do menu */}
         {navItems.flatMap((item) => {
