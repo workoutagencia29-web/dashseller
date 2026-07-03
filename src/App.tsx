@@ -74,9 +74,10 @@ export default function App() {
         <Route path="/afiliados/gerenciador" element={<GerenciadorAfiliados />} />
         <Route path="/afiliados/meus-afiliados" element={<MeusAfiliados />} />
 
-        {/* Ferramentas — Webhooks/Chaves/Integrações. No mobile ganham um switcher (FerramentasTabs); no desktop navega pela sidebar */}
+        {/* Webhooks — acessado pelo Perfil no mobile e pela sidebar no desktop; sem o switcher de Ferramentas */}
+        <Route path="/integracoes/webhooks" element={<Webhooks />} />
+        {/* Ferramentas — Chaves/Integrações. No mobile ganham um switcher (FerramentasTabs); no desktop navega pela sidebar */}
         <Route element={<FerramentasTabs />}>
-          <Route path="/integracoes/webhooks" element={<Webhooks />} />
           <Route path="/integracoes/chaves-de-api" element={<ChavesApi />} />
           <Route path="/integracoes/conexoes" element={<Integracoes />} />
         </Route>

@@ -3,7 +3,6 @@ import type { LayoutContext } from '../Layout'
 import { cn } from '../../lib/utils'
 
 const TABS = [
-  { label: 'Webhooks', path: '/integracoes/webhooks' },
   { label: 'Chaves de API', path: '/integracoes/chaves-de-api' },
   { label: 'Integrações', path: '/integracoes/conexoes' },
 ]

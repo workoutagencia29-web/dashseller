@@ -3,6 +3,7 @@ import {
   User,
   Settings,
   Globe,
+  Webhook,
   Headset,
   Sun,
   Moon,
@@ -57,6 +58,7 @@ export default function Perfil() {
     { label: 'Conta', icon: User, onClick: () => navigate('/conta') },
     { label: 'Configurações', icon: Settings, onClick: () => navigate('/configuracoes') },
     { label: 'Meus domínios', icon: Globe, onClick: () => navigate('/produto/meus-dominios') },
+    { label: 'Webhooks', icon: Webhook, onClick: () => navigate('/integracoes/webhooks') },
   ]
   const ajuda: RowItem[] = [
     {

@@ -14,7 +14,7 @@ interface Tab {
 /** As 5 áreas mantidas no mobile. "Início" fica no centro, elevado. */
 const TABS: Tab[] = [
   { label: 'Relatório', icon: FileText, path: '/relatorio/entradas', match: '/relatorio' },
-  { label: 'Ferramentas', icon: Wrench, path: '/integracoes/webhooks', match: '/integracoes' },
+  { label: 'Ferramentas', icon: Wrench, path: '/integracoes/chaves-de-api', match: '/integracoes' },
   { label: 'Início', icon: Home, path: '/', match: '/', center: true },
   { label: 'Financeiro', icon: Wallet, path: '/financeiro/geral', match: '/financeiro' },
   { label: 'Perfil', icon: User, path: '/perfil', match: '/perfil' },
