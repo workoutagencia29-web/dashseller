@@ -8,13 +8,15 @@ interface Tab {
   path: string
   /** prefixo que marca a aba como ativa (além do próprio path) */
   match: string
+  /** prefixos que NÃO devem acender esta aba (ex.: Webhooks vive no Perfil, não em Ferramentas) */
+  exclude?: string[]
   center?: boolean
 }
 
 /** As 5 áreas mantidas no mobile. "Início" fica no centro, elevado. */
 const TABS: Tab[] = [
   { label: 'Relatório', icon: FileText, path: '/relatorio/entradas', match: '/relatorio' },
-  { label: 'Ferramentas', icon: Wrench, path: '/integracoes/chaves-de-api', match: '/integracoes' },
+  { label: 'Ferramentas', icon: Wrench, path: '/integracoes/chaves-de-api', match: '/integracoes', exclude: ['/integracoes/webhooks'] },
   { label: 'Início', icon: Home, path: '/', match: '/', center: true },
   { label: 'Financeiro', icon: Wallet, path: '/financeiro/geral', match: '/financeiro' },
   { label: 'Perfil', icon: User, path: '/perfil', match: '/perfil' },
@@ -27,7 +29,10 @@ const TABS: Tab[] = [
  */
 export function BottomNav() {
   const { pathname } = useLocation()
-  const isActive = (t: Tab) => (t.match === '/' ? pathname === '/' : pathname.startsWith(t.match))
+  const isActive = (t: Tab) => {
+    if (t.exclude?.some((e) => pathname.startsWith(e))) return false
+    return t.match === '/' ? pathname === '/' : pathname.startsWith(t.match)
+  }
 
   return (
     <nav
