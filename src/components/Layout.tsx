@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { UserMenu } from './UserMenu'
+import { BottomNav } from './mobile/BottomNav'
 import { cn } from '../lib/utils'
 
 /** Contexto passado às páginas via <Outlet> (ex: abrir o menu no mobile). */
@@ -33,12 +34,13 @@ export function Layout() {
       <main
         className={cn(
           // overscroll-none trava o bounce/rubber-band (não "pula" nem mostra espaço vazio) em todas as páginas
-          'scrollbar-thin relative flex-1 overflow-y-auto overscroll-none',
+          // pb-24 no mobile reserva espaço pra bottom nav; no desktop (lg) não há barra, então pb-0
+          'scrollbar-thin relative flex-1 overflow-y-auto overscroll-none pb-24 lg:pb-0',
         )}
       >
-        {/* menu da conta — só na Dashboard, no canto superior direito */}
+        {/* menu da conta — só na Dashboard, no canto superior direito (desktop; no mobile a home tem sua própria top bar) */}
         {pathname === '/' && (
-          <div className="absolute right-5 top-5 z-30 sm:right-7 sm:top-7">
+          <div className="absolute right-5 top-5 z-30 hidden sm:right-7 sm:top-7 lg:block">
             <UserMenu />
           </div>
         )}
@@ -52,6 +54,9 @@ export function Layout() {
           <Outlet context={{ onOpenMobile: () => setMobileOpen(true) } as LayoutContext} />
         </div>
       </main>
+
+      {/* barra de navegação inferior — só no mobile */}
+      <BottomNav />
     </div>
   )
 }

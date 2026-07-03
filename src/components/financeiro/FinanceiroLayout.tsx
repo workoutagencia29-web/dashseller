@@ -16,7 +16,8 @@ export function FinanceiroLayout() {
   return (
     <>
       <Header title="Financeiro" subtitle="Saldo, assinaturas, contestações e taxas." onOpenMobile={onOpenMobile} />
-      <div className="scrollbar-thin mb-6 flex gap-1 overflow-x-auto border-b border-border">
+      {/* no mobile o Financeiro é só o Geral — a faixa de abas some (< lg); no desktop segue completa */}
+      <div className="scrollbar-thin mb-6 hidden gap-1 overflow-x-auto border-b border-border lg:flex">
         {TABS.map((t) => (
           <NavLink
             key={t.path}

@@ -3,6 +3,7 @@ import { Layout } from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Settings from './pages/Settings'
 import Conta from './pages/Conta'
+import Perfil from './pages/Perfil'
 import ClienteDetalhe from './pages/ClienteDetalhe'
 import { ReportsLayout } from './components/reports/ReportsLayout'
 import { ClientesTab } from './components/reports/ClientesTab'
@@ -17,6 +18,7 @@ import { TaxasTab } from './components/financeiro/TaxasTab'
 import Webhooks from './pages/Webhooks'
 import ChavesApi from './pages/ChavesApi'
 import Integracoes from './pages/Integracoes'
+import { FerramentasTabs } from './components/ferramentas/FerramentasTabs'
 import ConfigDominio from './pages/ConfigDominio'
 import MeusDominios from './pages/MeusDominios'
 import GerenciadorAfiliados from './pages/GerenciadorAfiliados'
@@ -44,6 +46,8 @@ export default function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/configuracoes" element={<Settings />} />
         <Route path="/conta" element={<Conta />} />
+        {/* Perfil — hub da bottom nav (mobile); não linkado na sidebar do desktop */}
+        <Route path="/perfil" element={<Perfil />} />
 
         {/* Relatórios — abas reais */}
         <Route element={<ReportsLayout />}>
@@ -70,10 +74,12 @@ export default function App() {
         <Route path="/afiliados/gerenciador" element={<GerenciadorAfiliados />} />
         <Route path="/afiliados/meus-afiliados" element={<MeusAfiliados />} />
 
-        {/* Integrações — Webhooks (movido das Configurações) */}
-        <Route path="/integracoes/webhooks" element={<Webhooks />} />
-        <Route path="/integracoes/chaves-de-api" element={<ChavesApi />} />
-        <Route path="/integracoes/conexoes" element={<Integracoes />} />
+        {/* Ferramentas — Webhooks/Chaves/Integrações. No mobile ganham um switcher (FerramentasTabs); no desktop navega pela sidebar */}
+        <Route element={<FerramentasTabs />}>
+          <Route path="/integracoes/webhooks" element={<Webhooks />} />
+          <Route path="/integracoes/chaves-de-api" element={<ChavesApi />} />
+          <Route path="/integracoes/conexoes" element={<Integracoes />} />
+        </Route>
 
         {/* Telas em construção — geradas a partir do menu */}
         {navItems.flatMap((item) => {

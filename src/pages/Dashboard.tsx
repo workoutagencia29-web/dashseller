@@ -5,10 +5,17 @@ import { TeamPerformanceChart } from '../components/TeamPerformanceChart'
 import { LiveSales } from '../components/LiveSales'
 import { PaymentMethodsDonut } from '../components/PaymentMethodsDonut'
 import { SaldoDisponivelCard } from '../components/SaldoDisponivelCard'
+import { MobileHome } from '../components/mobile/MobileHome'
+import { useIsMobile } from '../hooks/useIsMobile'
 import type { LayoutContext } from '../components/Layout'
 
 export default function Dashboard() {
   const { onOpenMobile } = useOutletContext<LayoutContext>()
+  const isMobile = useIsMobile()
+
+  // No mobile a home vira a experiência app-like (print do usuário); o desktop
+  // segue com o dashboard completo intacto.
+  if (isMobile) return <MobileHome />
 
   return (
     <>
