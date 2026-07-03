@@ -63,14 +63,14 @@ export function TeamPerformanceChart() {
     })
 
     if (hourly) {
-      return pts.map((p) => ({ label: formatHour(p.date), vendas: p.projectTeam + p.productTeam }))
+      return pts.map((p) => ({ label: formatHour(p.date), vendas: p.vendas }))
     }
 
     // aggregate hourly points into daily totals
     const byDay = new Map<number, ChartRow>()
     for (const p of pts) {
       const key = startOfDay(p.date).getTime()
-      const v = p.projectTeam + p.productTeam
+      const v = p.vendas
       const existing = byDay.get(key)
       if (existing) {
         existing.vendas += v

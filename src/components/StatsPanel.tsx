@@ -1,13 +1,13 @@
-import { ArrowUpRight, ArrowDownRight, Banknote } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
 import { DollarCircle, HomeSale, Wallet, LotOfCash } from 'iconoir-react'
 import { stats, type Stat } from '../data/mockData'
 import { cn, formatNumber, formatCurrency } from '../lib/utils'
 
 const ICONS = {
-  employees: DollarCircle, // Total de Vendas  → iconoir-dollar-circle
-  applicants: HomeSale, // Vendas Aprovadas → iconoir-home-sale
-  new: LotOfCash, // Ticket Médio     → iconoir-lot-of-cash
-  resigned: Wallet, // Saldo Disponível → iconoir-wallet
+  sales: DollarCircle, // Total de Vendas  → iconoir-dollar-circle
+  approved: HomeSale, // Vendas Aprovadas → iconoir-home-sale
+  ticket: LotOfCash, // Ticket Médio     → iconoir-lot-of-cash
+  balance: Wallet, // Saldo Disponível → iconoir-wallet
 } as const
 
 function formatDelta(delta: number): string {
@@ -25,15 +25,6 @@ function StatBlock({ stat }: { stat: Stat }) {
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-card-muted text-muted">
           <Icon className="h-5 w-5" strokeWidth={2} />
         </div>
-        {stat.action && (
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-          >
-            <Banknote className="h-4 w-4" />
-            {stat.action}
-          </button>
-        )}
       </div>
       <div>
         <div className="text-[24px] font-bold leading-none tracking-tight text-foreground sm:text-[28px]">

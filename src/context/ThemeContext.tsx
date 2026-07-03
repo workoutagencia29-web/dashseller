@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 
 type Theme = 'light' | 'dark'
 
@@ -21,11 +21,23 @@ function getInitialTheme(): Theme {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme)
+  const firstRun = useRef(true)
 
   useEffect(() => {
     const root = document.documentElement
     root.classList.toggle('dark', theme === 'dark')
     window.localStorage.setItem(STORAGE_KEY, theme)
+
+    // Na primeira renderização não anima (não há "de → para"); nas trocas
+    // seguintes, liga a transição suave das cores só durante o instante da
+    // troca, removendo depois pra não deixar hovers/interações lentos.
+    if (firstRun.current) {
+      firstRun.current = false
+      return
+    }
+    root.classList.add('theme-transition')
+    const t = window.setTimeout(() => root.classList.remove('theme-transition'), 500)
+    return () => window.clearTimeout(t)
   }, [theme])
 
   const setTheme = (next: Theme) => setThemeState(next)

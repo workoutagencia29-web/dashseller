@@ -1,8 +1,7 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X, type LucideIcon } from 'lucide-react'
-import { cn } from '../../lib/utils'
-import { formatCurrency } from '../../lib/utils'
+import { cn, formatCurrency } from '../../lib/utils'
 
 /* --------------------------- Card de saldo ---------------------------- */
 
@@ -70,6 +69,26 @@ export function Modal({
   children: ReactNode
   footer?: ReactNode
 }) {
+  useEffect(() => {
+    if (!open) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    // trava o scroll do fundo enquanto o modal está aberto (padrão dos outros overlays)
+    const main = document.querySelector('main')
+    const prevMain = main?.style.overflow ?? ''
+    const html = document.documentElement
+    const prevHtml = html.style.overflow
+    if (main) main.style.overflow = 'hidden'
+    html.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      if (main) main.style.overflow = prevMain
+      html.style.overflow = prevHtml
+    }
+  }, [open, onClose])
+
   if (!open) return null
   // portal pro body: garante que o overlay (e o blur) fique relativo à viewport
   // e cubra a tela inteira — incluindo a sidebar — de uma vez só

@@ -1,9 +1,10 @@
 import { useState, type ReactNode } from 'react'
-import { useOutletContext } from 'react-router-dom'
-import { Copy, Check, Info, RefreshCw, Globe } from 'lucide-react'
+import { Link, useOutletContext } from 'react-router-dom'
+import { Copy, Check, Info, RefreshCw, Globe, ArrowRight } from 'lucide-react'
 import { Header } from '../components/Header'
 import type { LayoutContext } from '../components/Layout'
 import { SettingsCard, Button } from '../components/settings/primitives'
+import { useDomains } from '../data/dominiosStore'
 import { cn } from '../lib/utils'
 
 /** Destino fixo do CNAME (infra da Nummo). */
@@ -64,6 +65,7 @@ function CnameRow({
 
 export default function ConfigDominio() {
   const { onOpenMobile } = useOutletContext<LayoutContext>()
+  const { addDominio } = useDomains()
 
   const [domain, setDomain] = useState('')
   const [savedDomain, setSavedDomain] = useState('')
@@ -86,6 +88,7 @@ export default function ConfigDominio() {
   function atualizar() {
     if (!cleanDomain) return
     setSavedDomain(cleanDomain)
+    addDominio(cleanDomain) // manda o domínio para "Meus domínios"
     setJustSaved(true)
     setTimeout(() => setJustSaved(false), 2200)
   }
@@ -184,11 +187,19 @@ export default function ConfigDominio() {
 
           {savedDomain && (
             <div className={cn(
-              'mt-4 flex items-center gap-2 rounded-xl border border-positive/20 bg-positive/5 px-3.5 py-2.5 text-sm text-foreground transition-opacity',
+              'mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-positive/20 bg-positive/5 px-3.5 py-2.5 text-sm text-foreground transition-opacity',
             )}>
               <Check className="h-4 w-4 shrink-0 text-positive" />
-              Domínio salvo: seu checkout está configurado para{' '}
-              <span className="font-mono text-foreground">pay.{savedDomain}</span>
+              <span>
+                Domínio adicionado em <span className="font-semibold">Meus domínios</span>:{' '}
+                <span className="font-mono text-foreground">pay.{savedDomain}</span>
+              </span>
+              <Link
+                to="/produto/meus-dominios"
+                className="ml-auto inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+              >
+                Ver <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
           )}
         </SettingsCard>

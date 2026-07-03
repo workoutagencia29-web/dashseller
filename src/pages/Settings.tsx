@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Building2, Landmark, Bell, BellRing, ArrowLeft } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { PersonalNotificationsSection } from '../components/settings/ProfileSections'
@@ -26,8 +26,6 @@ const ALL_IDS = NAV.flatMap((g) => g.items.map((i) => i.id))
 
 export default function Settings() {
   const [activeId, setActiveId] = useState(ALL_IDS[0])
-  const location = useLocation()
-  const navigate = useNavigate()
 
   useEffect(() => {
     const scroller = document.querySelector('main')
@@ -66,18 +64,6 @@ export default function Settings() {
       scroller?.removeEventListener('scroll', onScroll)
     }
   }, [])
-
-  // veio do menu do avatar (Notificações) → abre a Configurações já na seção de notificações
-  useEffect(() => {
-    const target = (location.state as { scrollTo?: string } | null)?.scrollTo
-    if (!target) return
-    const t = setTimeout(() => {
-      document.getElementById(target)?.scrollIntoView({ behavior: 'auto', block: 'start' })
-      setActiveId(target)
-      navigate(location.pathname, { replace: true, state: null }) // limpa pra não repetir
-    }, 60)
-    return () => clearTimeout(t)
-  }, [location.state, location.pathname, navigate])
 
   function goTo(id: string) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })

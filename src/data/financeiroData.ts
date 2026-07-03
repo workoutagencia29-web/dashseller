@@ -19,7 +19,7 @@ function dayAgo(maxDays: number, seed: number, withHour = true): Date {
 /* ------------------------------ Saldos -------------------------------- */
 
 export const balances = {
-  disponivel: 18432.5,
+  disponivel: 254782.45, // mesma fonte do "Saldo Disponível" do Dashboard (stats)
   aReceber: 9210,
   reserva: 3500,
   protesto: 1280,
@@ -27,8 +27,8 @@ export const balances = {
 
 /* ------------------------------ Extrato ------------------------------- */
 
-export type MovType = 'Entrada' | 'Saída' | 'Estorno' | 'Taxa' | 'Chargeback' | 'Repasse'
-export type MovCat = 'Venda' | 'Saque' | 'Antecipação' | 'Ajuste' | 'Taxa' | 'MED'
+type MovType = 'Entrada' | 'Saída' | 'Estorno' | 'Taxa' | 'Chargeback' | 'Repasse'
+type MovCat = 'Venda' | 'Saque' | 'Antecipação' | 'Ajuste' | 'Taxa' | 'MED'
 
 export interface Movimentacao {
   id: number
@@ -132,7 +132,7 @@ export const antecipacoes: Antecipacao[] = Array.from({ length: 14 }, (_, i) => 
 /* ---------------------------- Assinaturas ----------------------------- */
 
 export type AssinStatus = 'Ativa' | 'Em Atraso' | 'Cancelada' | 'Pausada'
-export type FaturaStatus = 'Pago' | 'Pendente' | 'Vencido' | 'Cancelado'
+type FaturaStatus = 'Pago' | 'Pendente' | 'Vencido' | 'Cancelado'
 
 export interface Fatura {
   id: string
@@ -141,12 +141,6 @@ export interface Fatura {
   status: FaturaStatus
   pagamento: Date | null
   method: string
-}
-export interface Notificacao {
-  id: string
-  descricao: string
-  criadoEm: Date
-  status: 'Ativa' | 'Inativa'
 }
 export interface Assinatura {
   id: number
@@ -164,9 +158,6 @@ export interface Assinatura {
   lastPayment: Date
   nextCharge: Date
   cobrancaId: string
-  methodsEnabled: { pix: boolean; cartao: boolean; boleto: boolean }
-  descontos: { pix: string; boleto: string; cartao: string }
-  notificacoes: Notificacao[]
   faturas: Fatura[]
 }
 
@@ -218,7 +209,7 @@ function buildAssinatura(i: number): Assinatura {
       vencimento: venc,
       value,
       status: fStatus,
-      pagamento: fStatus === 'Pago' ? addDays(venc, -1) : null,
+      pagamento: fStatus === 'Pago' ? addDays(venc, Math.floor(seeded(i * 13 + j) * 4)) : null,
       method: pick(faturaMethods, i + j),
     }
   })
@@ -239,12 +230,6 @@ function buildAssinatura(i: number): Assinatura {
     lastPayment: last,
     nextCharge: next,
     cobrancaId: `SUB-${928374 + i * 211}`,
-    methodsEnabled: { pix: true, cartao: true, boleto: seeded(i) > 0.5 },
-    descontos: { pix: '5%', boleto: 'R$ 0,00', cartao: '0%' },
-    notificacoes: [
-      { id: `NTF-${i}1`, descricao: 'Lembrete 3 dias antes do vencimento', criadoEm: start, status: 'Ativa' },
-      { id: `NTF-${i}2`, descricao: 'Aviso no dia do vencimento', criadoEm: start, status: seeded(i + 1) > 0.4 ? 'Ativa' : 'Inativa' },
-    ],
     faturas,
   }
 }
@@ -284,7 +269,7 @@ export const contestacoes: Contestacao[] = Array.from({ length: 12 }, (_, i) => 
     id: `CTS-${5500 + i * 17}`,
     date: dayAgo(40, i + 90),
     value: money(80 + seeded(i * 6 + 2) * 1900),
-    txId: `TXN${928374 + i * 137}`.slice(0, 10),
+    txId: `TXN${String(928374 + i * 137).padStart(8, '0')}`,
     status,
     defesaEnviada,
     prazo: status === 'Aberta' ? `${Math.floor(seeded(i) * 6) + 1} dias` : null,
@@ -295,7 +280,7 @@ export const contestacoesResumo = {
   totalValor: money(contestacoes.filter((c) => c.status === 'Aberta' || c.status === 'Defesa Enviada').reduce((s, c) => s + c.value, 0)),
   qtdAbertas: contestacoes.filter((c) => c.status === 'Aberta').length,
   defesasEnviadas: contestacoes.filter((c) => c.defesaEnviada).length,
-  defesasPendentes: contestacoes.filter((c) => c.status === 'Aberta').length,
+  defesasPendentes: contestacoes.filter((c) => c.status === 'Defesa Enviada').length,
   defesasAprovadas: contestacoes.filter((c) => c.status === 'Aprovada').length,
   valorLiberado: money(contestacoes.filter((c) => c.status === 'Aprovada').reduce((s, c) => s + c.value, 0)),
 }

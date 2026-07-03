@@ -7,14 +7,15 @@ import {
   saques as saquesData,
   antecipacoes as antecipacoesData,
   type Saque,
+  type SaqueStatus,
   type Antecipacao,
+  type AntecipStatus,
   type Movimentacao,
 } from '../../data/financeiroData'
 import { bankAccounts } from '../../data/settingsData'
 import { DateRangeFilter } from '../ui/DateRangeFilter'
 import { presetRange, addDays, startOfDay, type RangePreset, type DateRange } from '../../lib/date'
-import { formatCurrency } from '../../lib/utils'
-import { cn } from '../../lib/utils'
+import { cn, formatCurrency } from '../../lib/utils'
 import { Button, Field, Input, Select } from '../settings/primitives'
 import { StatusBadge, TypeBadge, Drawer, DetailRow, DrawerSection, Pagination, GhostRows, MultiSelect, SearchInput } from '../reports/reportsPrimitives'
 import { BalanceCard, InternalTabs, Modal } from './financeiroPrimitives'
@@ -23,8 +24,8 @@ const fmtDateTime = (d: Date) =>
   `${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
 
 const PER_PAGE = 10
-const SAQUE_STATUSES = ['Concluído', 'Pendente', 'Em Revisão', 'Negado']
-const ANTECIP_STATUSES = ['Aprovada', 'Pendente', 'Negada']
+const SAQUE_STATUSES: SaqueStatus[] = ['Concluído', 'Pendente', 'Em Revisão', 'Negado']
+const ANTECIP_STATUSES: AntecipStatus[] = ['Aprovada', 'Pendente', 'Negada']
 const CONTA_OPTIONS = Array.from(new Set(saquesData.map((s) => s.bankAccount)))
 const MOV_TIPOS = Array.from(new Set(movimentacoes.map((m) => m.type)))
 /** Conta de recebimento padrão no saque: a conta principal cadastrada em Configurações. */
@@ -154,7 +155,7 @@ export function GeralTab() {
           value={balances.aReceber}
           icon={Clock}
           action={
-            <Button size="sm" variant="outline" onClick={() => setInternal('Antecipações')}>
+            <Button size="sm" variant="outline" onClick={() => setModal('antecipar')}>
               Solicitar Antecipação
             </Button>
           }

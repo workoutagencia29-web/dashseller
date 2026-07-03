@@ -1,6 +1,6 @@
 import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { QrCode, CreditCard, Barcode, Wallet, type LucideIcon } from 'lucide-react'
-import { totalEmployeeData, totalEmployeeCount, methodConversions, type MethodConversion } from '../data/mockData'
+import { paymentMethodsData, totalTransacoesHoje, methodConversions, type MethodConversion } from '../data/mockData'
 import { formatNumber, formatCurrency } from '../lib/utils'
 
 const METHOD_ICONS: Record<MethodConversion['icon'], LucideIcon> = {
@@ -40,14 +40,14 @@ function ConversionRing({ percent, color }: { percent: number; color: string }) 
   )
 }
 
-export function TotalEmployeeDonut() {
+export function PaymentMethodsDonut() {
   return (
     <div className="flex h-full flex-col">
       {/* header */}
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2.5 text-lg font-bold text-foreground">
           <span className="h-5 w-1.5 shrink-0 rounded-full bg-primary" />
-          Conversões por método
+          Métodos de pagamento
         </h2>
       </div>
 
@@ -56,7 +56,7 @@ export function TotalEmployeeDonut() {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={totalEmployeeData}
+              data={paymentMethodsData}
               dataKey="value"
               nameKey="label"
               cx="50%"
@@ -70,7 +70,7 @@ export function TotalEmployeeDonut() {
               stroke="none"
               isAnimationActive={false}
             >
-              {totalEmployeeData.map((seg) => (
+              {paymentMethodsData.map((seg) => (
                 <Cell key={seg.label} fill={seg.color} />
               ))}
             </Pie>
@@ -80,10 +80,10 @@ export function TotalEmployeeDonut() {
         {/* glow + center label */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-[32px] font-bold leading-none text-foreground">
-            {formatNumber(totalEmployeeCount)}
+            {formatNumber(totalTransacoesHoje)}
           </span>
           <span className="mt-1 text-xs text-muted">
-            {totalEmployeeCount === 1 ? 'Transação' : 'Transações'}
+            {totalTransacoesHoje === 1 ? 'Transação hoje' : 'Transações hoje'}
           </span>
         </div>
       </div>

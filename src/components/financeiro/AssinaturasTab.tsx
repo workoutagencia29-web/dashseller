@@ -1,22 +1,23 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { assinaturas, assinaturasResumo, type Assinatura } from '../../data/financeiroData'
+import { assinaturas, assinaturasResumo, type Assinatura, type AssinStatus } from '../../data/financeiroData'
 import { cn, formatCurrency } from '../../lib/utils'
 import { DateRangeFilter } from '../ui/DateRangeFilter'
 import { presetRange, addDays, startOfDay, type RangePreset, type DateRange } from '../../lib/date'
 import { StatusBadge, MultiSelect, SearchInput, Drawer, DetailRow, Pagination, GhostRows } from '../reports/reportsPrimitives'
+import { Avatar } from '../ui/Avatar'
 
 const fmtDate = (d: Date) => d.toLocaleDateString('pt-BR')
 
 const PER_PAGE = 10
 
 const PRODUCTS = Array.from(new Set(assinaturas.map((a) => a.product)))
-const STATUSES = ['Ativa', 'Em Atraso', 'Pausada', 'Cancelada']
+const STATUSES: AssinStatus[] = ['Ativa', 'Em Atraso', 'Pausada', 'Cancelada']
 
 function ResumoCard({ label, count, mrr, arr, tone }: { label: string; count: number; mrr: number; arr: number; tone: 'success' | 'warning' }) {
   return (
     <div className="rounded-3xl border border-border bg-card p-6">
       <p className="text-sm text-muted">{label}</p>
-      <p className={tone === 'warning' ? 'mt-2 text-[32px] font-bold leading-none text-negative' : 'mt-2 text-[32px] font-bold leading-none text-foreground'}>
+      <p className={tone === 'warning' ? 'mt-2 text-[32px] font-bold leading-none text-chart-yellow' : 'mt-2 text-[32px] font-bold leading-none text-foreground'}>
         {count}
       </p>
       <div className="mt-4 flex gap-8 border-t border-border pt-4">
@@ -173,9 +174,9 @@ export function AssinaturasTab() {
             Assinaturas
           </h3>
           <div className="flex flex-wrap items-center gap-2.5">
-            <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} />
             <MultiSelect label="Produto" options={PRODUCTS} selected={products} onChange={setProducts} />
             <MultiSelect label="Status" options={STATUSES} selected={status} onChange={setStatus} />
+            <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} />
             <SearchInput value={search} onChange={setSearch} placeholder="Buscar comprador ou produto" />
           </div>
         </div>
@@ -195,7 +196,12 @@ export function AssinaturasTab() {
             <tbody>
               {pageRows.map((a) => (
                 <tr key={a.id} className="h-[63px] border-b border-border/60 last:border-0 hover:bg-card-muted/40">
-                  <td className="whitespace-nowrap py-3.5 pr-3 font-medium text-foreground">{a.buyerName}</td>
+                  <td className="py-3.5 pr-3">
+                    <div className="flex items-center gap-2.5">
+                      <Avatar name={a.buyerName} seed={a.avatarSeed} size={32} />
+                      <span className="truncate font-medium text-foreground">{a.buyerName}</span>
+                    </div>
+                  </td>
                   <td className="truncate px-3 py-3.5 text-muted" title={a.product}>{a.product}</td>
                   <td className="whitespace-nowrap px-3 py-3.5 text-muted">{a.method}</td>
                   <td className="whitespace-nowrap px-3 py-3.5 font-medium text-foreground">{formatCurrency(a.value)}</td>

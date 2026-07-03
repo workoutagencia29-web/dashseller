@@ -53,7 +53,7 @@ export function ProfileSection() {
         {photo ? (
           <img src={photo} alt="Foto de perfil" className="h-20 w-20 rounded-full object-cover ring-2 ring-border" />
         ) : (
-          <Avatar name="Pristia Candra" seed={31} size={80} />
+          <Avatar name="Pedro Rossi" seed={31} size={80} />
         )}
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2">
@@ -73,16 +73,16 @@ export function ProfileSection() {
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Field label="Nome completo">
-          <Input defaultValue="Pristia Candra" placeholder="Seu nome" />
+          <Input defaultValue="Pedro Rossi" placeholder="Seu nome" />
         </Field>
         <Field label="E-mail">
-          <Input type="email" defaultValue="pristia@nummo.com" />
+          <Input type="email" defaultValue="pedro@nummo.com" />
         </Field>
         <Field label="Telefone / WhatsApp">
           <Input value={phone} onChange={(e) => setPhone(maskPhone(e.target.value))} inputMode="numeric" />
         </Field>
         <Field label="Cargo / função">
-          <Input defaultValue="Administradora" />
+          <Input defaultValue="Administrador" />
         </Field>
         <Field label="Idioma preferido">
           <Select defaultValue="pt-BR">

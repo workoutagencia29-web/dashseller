@@ -90,29 +90,27 @@ export interface Stat {
   label: string
   value: number
   delta: number // porcentagem, o sinal indica a direção
-  icon: 'employees' | 'applicants' | 'new' | 'resigned'
+  icon: 'sales' | 'approved' | 'ticket' | 'balance'
   /** 'currency' exibe o valor como R$; padrão é número simples. */
   format?: 'number' | 'currency'
-  /** Se definido, mostra um botão de ação ao lado do ícone (ex: "Sacar"). */
-  action?: string
 }
 
 export const stats: Stat[] = [
-  { id: 'total', label: 'Total de Vendas', value: 3540, delta: 25.5, icon: 'employees', format: 'currency' },
-  { id: 'applicants', label: 'Vendas Aprovadas', value: 1150, delta: 4.1, icon: 'applicants' },
-  { id: 'new', label: 'Ticket Médio', value: 500, delta: 5.1, icon: 'new', format: 'currency' },
-  { id: 'resigned', label: 'Saldo Disponível', value: 254782.45, delta: 25.5, icon: 'resigned', format: 'currency' },
+  // Total de Vendas = Vendas Aprovadas (1.150) × Ticket Médio (R$ 500) = R$ 575.000
+  { id: 'total', label: 'Total de Vendas', value: 575000, delta: 25.5, icon: 'sales', format: 'currency' },
+  { id: 'approved', label: 'Vendas Aprovadas', value: 1150, delta: 4.1, icon: 'approved' },
+  { id: 'ticket', label: 'Ticket Médio', value: 500, delta: 5.1, icon: 'ticket', format: 'currency' },
+  { id: 'saldo', label: 'Saldo Disponível', value: 254782.45, delta: 25.5, icon: 'balance', format: 'currency' },
 ]
 
-/* ------------------------- Desempenho da equipe ----------------------- */
-/* Vendas por hora (duas equipes). Gerado a partir de hoje pra que os       */
-/* filtros de período (Hoje, Ontem, Últimos N dias...) tenham dados reais.  */
+/* ------------------------- Desempenho de vendas ----------------------- */
+/* Vendas por hora. Gerado a partir de hoje pra que os filtros de período   */
+/* (Hoje, Ontem, Últimos N dias...) tenham dados reais.                     */
 
 export interface SalesPoint {
   /** Início da hora (data + hora cheia). */
   date: Date
-  projectTeam: number
-  productTeam: number
+  vendas: number
 }
 
 const DAYS_BACK = 120
@@ -141,11 +139,11 @@ function buildSalesData(): SalesPoint[] {
     for (let h = 0; h < 24; h++) {
       const w = hourWeight(h)
       const seed = d * 24 + h
-      const proj = Math.max(0, Math.round(26 * w * trend * weekend * (0.7 + 0.6 * seeded(seed))))
-      const prod = Math.max(0, Math.round(22 * w * trend * weekend * (0.7 + 0.6 * seeded(seed + 7777))))
+      const a = Math.max(0, Math.round(26 * w * trend * weekend * (0.7 + 0.6 * seeded(seed))))
+      const b = Math.max(0, Math.round(22 * w * trend * weekend * (0.7 + 0.6 * seeded(seed + 7777))))
       const date = new Date(day)
       date.setHours(h, 0, 0, 0)
-      points.push({ date, projectTeam: proj, productTeam: prod })
+      points.push({ date, vendas: a + b })
     }
   }
   return points
@@ -154,40 +152,7 @@ function buildSalesData(): SalesPoint[] {
 export const salesData = buildSalesData()
 export const salesDataStart = salesData[0].date
 
-/* ----------------------------- Funcionários --------------------------- */
-
-export interface Employee {
-  id: number
-  name: string
-  email: string
-  avatarSeed: number
-  jobTitle: string
-  lineManager: string
-  department: string
-  office: string
-  status: 'Ativo' | 'Integração' | 'Desligamento'
-}
-
-export const employees: Employee[] = [
-  { id: 1, name: 'Lincoln Torff', email: 'lincoln@unpixel.com', avatarSeed: 12, jobTitle: 'Designer UI/UX', lineManager: '@Pristiacandra', department: 'Equipe de Produto', office: 'Unpixel', status: 'Ativo' },
-  { id: 2, name: 'Hanna Baptista', email: 'hanna@unpixel.com', avatarSeed: 5, jobTitle: 'Designer Gráfico', lineManager: '@Pristiacandra', department: 'Equipe de Produto', office: 'Unpixel', status: 'Ativo' },
-  { id: 3, name: 'Miracle Geidt', email: 'miracle@unpixel.com', avatarSeed: 32, jobTitle: 'Financeiro', lineManager: '@Pristiacandra', department: 'Equipe Financeira', office: 'Unpixel', status: 'Integração' },
-  { id: 4, name: 'Rayna Torff', email: 'rayna@unpixel.com', avatarSeed: 9, jobTitle: 'Gerente de Projetos', lineManager: '@Pristiacandra', department: 'Equipe de Produto', office: 'Unpixel', status: 'Ativo' },
-  { id: 5, name: 'Giana Lipshutz', email: 'giana@unpixel.com', avatarSeed: 16, jobTitle: 'Gerente de Projetos', lineManager: '@Pristiacandra', department: 'Equipe de Projeto', office: 'Pixxel', status: 'Ativo' },
-  { id: 6, name: 'James George', email: 'james@unpixel.com', avatarSeed: 51, jobTitle: 'Engenheiro Frontend', lineManager: '@Jorge', department: 'Equipe de Engenharia', office: 'Pixxel', status: 'Ativo' },
-  { id: 7, name: 'Jordyn George', email: 'jordyn@unpixel.com', avatarSeed: 25, jobTitle: 'Engenheiro Backend', lineManager: '@Jorge', department: 'Equipe de Engenharia', office: 'Pixxel', status: 'Integração' },
-  { id: 8, name: 'Skylar Geidt', email: 'skylar@unpixel.com', avatarSeed: 47, jobTitle: 'Engenheiro de QA', lineManager: '@Jorge', department: 'Equipe de Engenharia', office: 'Stack', status: 'Ativo' },
-  { id: 9, name: 'Cooper Press', email: 'cooper@unpixel.com', avatarSeed: 60, jobTitle: 'Gerente de RH', lineManager: '@Pristiacandra', department: 'Equipe de Pessoas', office: 'Stack', status: 'Ativo' },
-  { id: 10, name: 'Brandon Aminoff', email: 'brandon@unpixel.com', avatarSeed: 11, jobTitle: 'Líder de Marketing', lineManager: '@Pristiacandra', department: 'Equipe de Marketing', office: 'Stack', status: 'Desligamento' },
-  { id: 11, name: 'Alfredo Schleifer', email: 'alfredo@unpixel.com', avatarSeed: 33, jobTitle: 'Analista de Dados', lineManager: '@Jorge', department: 'Equipe de Dados', office: 'Unpixel', status: 'Ativo' },
-  { id: 12, name: 'Talan Bergson', email: 'talan@unpixel.com', avatarSeed: 14, jobTitle: 'Executivo de Vendas', lineManager: '@Pristiacandra', department: 'Equipe de Vendas', office: 'Pixxel', status: 'Integração' },
-]
-
-export const offices = ['Todos os Escritórios', 'Unpixel', 'Pixxel', 'Stack']
-export const jobTitles = ['Todos os Cargos', ...Array.from(new Set(employees.map((e) => e.jobTitle)))]
-export const statuses = ['Todos os Status', 'Ativo', 'Integração', 'Desligamento']
-
-/* --------------------------- Total de funcionários -------------------- */
+/* ------------------- Transações por método (donut) -------------------- */
 
 export interface DonutSegment {
   label: string
@@ -195,14 +160,15 @@ export interface DonutSegment {
   color: string
 }
 
-export const totalEmployeeData: DonutSegment[] = [
+/** Distribuição das transações de HOJE por método de pagamento. */
+export const paymentMethodsData: DonutSegment[] = [
   { label: 'Pix', value: 58, color: '#1b47c4' },
   { label: 'Cartões', value: 41, color: '#2f6bff' },
   { label: 'Boleto', value: 14, color: '#6c97ff' },
   { label: 'Outros', value: 8, color: '#aecbff' },
 ]
 
-export const totalEmployeeCount = totalEmployeeData.reduce((sum, s) => sum + s.value, 0)
+export const totalTransacoesHoje = paymentMethodsData.reduce((sum, s) => sum + s.value, 0)
 
 /** Conversão por método de pagamento (cada bloco abaixo do donut). */
 export interface MethodConversion {

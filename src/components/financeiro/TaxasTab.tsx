@@ -1,4 +1,3 @@
-import { Lock } from 'lucide-react'
 import { taxas } from '../../data/financeiroData'
 
 export function TaxasTab() {
@@ -9,17 +8,15 @@ export function TaxasTab() {
           <span className="h-5 w-1.5 shrink-0 rounded-full bg-primary" />
           Taxas por método de pagamento
         </h3>
-        <p className="mt-2 flex items-center gap-1.5 text-sm text-muted">
-          <Lock className="h-3.5 w-3.5" /> Somente leitura — as taxas são definidas pelo admin do gateway nummo.
-        </p>
 
         <div className="scrollbar-thin mt-5 overflow-x-auto">
-          <table className="w-full min-w-[480px] border-collapse text-sm">
+          <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
                 <th className="py-3 pr-3 font-semibold">Método</th>
                 <th className="px-3 py-3 font-semibold">Formato da Taxa</th>
-                <th className="py-3 pl-3 font-semibold">Taxa Real</th>
+                <th className="px-3 py-3 font-semibold">Taxa Real</th>
+                <th className="py-3 pl-3 font-semibold">Observação</th>
               </tr>
             </thead>
             <tbody>
@@ -27,11 +24,12 @@ export function TaxasTab() {
                 <tr key={t.method} className="border-b border-border/60 last:border-0">
                   <td className="whitespace-nowrap py-4 pr-3 font-semibold text-foreground">{t.method}</td>
                   <td className="px-3 py-4 text-muted">{t.format}</td>
-                  <td className="py-4 pl-3">
+                  <td className="px-3 py-4">
                     <span className="inline-block rounded-lg bg-primary/10 px-2.5 py-1 font-mono text-[13px] font-medium text-primary">
                       {t.example}
                     </span>
                   </td>
+                  <td className="py-4 pl-3 text-muted">{t.obs}</td>
                 </tr>
               ))}
             </tbody>

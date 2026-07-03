@@ -11,7 +11,7 @@ import { cn, formatCurrency } from '../lib/utils'
  */
 export function SaldoDisponivelCard({ className }: { className?: string }) {
   const navigate = useNavigate()
-  const saldo = stats.find((s) => s.id === 'resigned')?.value ?? 0
+  const saldo = stats.find((s) => s.id === 'saldo')?.value ?? 0
 
   return (
     <div
@@ -53,7 +53,7 @@ export function SaldoDisponivelCard({ className }: { className?: string }) {
       <button
         type="button"
         onClick={() => navigate('/financeiro/geral', { state: { openSaque: true } })}
-        className="relative z-10 mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#0a1020] py-4 text-base font-bold uppercase tracking-wide text-white shadow-lg shadow-black/25 transition-colors hover:bg-[#111a33] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+        className="relative z-10 mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-background py-4 text-base font-bold uppercase tracking-wide text-foreground shadow-lg shadow-black/25 transition-colors hover:bg-card-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 dark:bg-[#0a1020] dark:text-white dark:hover:bg-[#111a33] dark:focus-visible:ring-white/40"
       >
         <ArrowUpFromLine className="h-4 w-4" />
         Solicitar saque

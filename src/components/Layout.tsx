@@ -15,8 +15,7 @@ export function Layout() {
   const { pathname } = useLocation()
 
   // Páginas "focadas" (Configurações e Conta): a sidebar principal some — fica só o índice da própria página.
-  const focused =
-    pathname === '/configuracoes' || pathname.startsWith('/configuracoes/') || pathname === '/conta'
+  const focused = pathname === '/configuracoes' || pathname === '/conta'
 
   // Chave por seção (1º segmento da URL) — troca de seção dispara o fade; trocar de sub-aba não.
   const section = '/' + (pathname.split('/')[1] ?? '')

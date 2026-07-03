@@ -41,6 +41,28 @@
     border-color: rgb(var(--border));
   }
 
+  /* Transição suave ao alternar claro/escuro. A classe `theme-transition` é
+     adicionada pelo ThemeProvider só no instante da troca — assim as cores
+     fazem um fade e hovers/interações continuam rápidos no resto do tempo. */
+  html.theme-transition,
+  html.theme-transition *,
+  html.theme-transition *::before,
+  html.theme-transition *::after {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow !important;
+    transition-duration: 0.4s !important;
+    transition-timing-function: ease !important;
+    transition-delay: 0s !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.theme-transition,
+    html.theme-transition *,
+    html.theme-transition *::before,
+    html.theme-transition *::after {
+      transition-duration: 0s !important;
+    }
+  }
+
   html,
   body,
   #root {

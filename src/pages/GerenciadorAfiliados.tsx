@@ -532,7 +532,7 @@ function ProfileDrawerBody({ a, focus, onChangeVinculos, onAddNote, onPause, onR
       </DrawerSection>
 
       {/* produtos vinculados */}
-      <div ref={produtosRef} className="scroll-mt-4">
+      <div ref={produtosRef} className="mb-8 scroll-mt-4">
         <DrawerSection title={`Produtos vinculados (${a.vinculos.length})`}>
           {a.vinculos.length === 0 ? (
             <p className="rounded-xl border border-dashed border-border px-4 py-4 text-sm text-muted">
@@ -595,9 +595,9 @@ function ProfileDrawerBody({ a, focus, onChangeVinculos, onAddNote, onPause, onR
         {a.history.length === 0 ? (
           <p className="text-sm text-muted">Nenhuma alteração registrada.</p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {a.history.map((h) => (
-              <div key={h.id} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card-muted/30 px-3.5 py-2.5">
+              <div key={h.id} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card-muted/30 px-3.5 py-3">
                 <span className="text-sm text-foreground">{h.action}</span>
                 <span className="shrink-0 text-xs text-muted">{h.date}</span>
               </div>

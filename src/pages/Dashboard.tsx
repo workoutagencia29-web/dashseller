@@ -3,7 +3,7 @@ import { Header } from '../components/Header'
 import { StatsPanel } from '../components/StatsPanel'
 import { TeamPerformanceChart } from '../components/TeamPerformanceChart'
 import { LiveSales } from '../components/LiveSales'
-import { TotalEmployeeDonut } from '../components/TotalEmployeeDonut'
+import { PaymentMethodsDonut } from '../components/PaymentMethodsDonut'
 import { SaldoDisponivelCard } from '../components/SaldoDisponivelCard'
 import type { LayoutContext } from '../components/Layout'
 
@@ -36,7 +36,7 @@ export default function Dashboard() {
           </div>
           {/* coluna direita: donut (mais alto, ocupa a altura toda) */}
           <div className="rounded-3xl border border-border bg-card p-5 sm:p-6">
-            <TotalEmployeeDonut />
+            <PaymentMethodsDonut />
           </div>
         </section>
       </div>

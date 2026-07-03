@@ -75,7 +75,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
             'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
             collapsed && 'justify-center px-0',
             directActive
-              ? 'bg-primary text-primary-foreground shadow-glow'
+              ? 'bg-primary text-primary-foreground'
               : 'text-muted hover:bg-card-muted hover:text-foreground',
           )}
         >

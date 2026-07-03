@@ -3,7 +3,6 @@ import { useOutletContext } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import {
   Globe,
-  Plus,
   Star,
   RefreshCw,
   Trash2,
@@ -14,22 +13,15 @@ import {
   CheckCircle2,
   Loader2,
   AlertTriangle,
-  X,
   type LucideIcon,
 } from 'lucide-react'
 import { Header } from '../components/Header'
 import type { LayoutContext } from '../components/Layout'
-import { Button, Field, Badge } from '../components/settings/primitives'
+import { Button, Badge } from '../components/settings/primitives'
 import { Drawer, DrawerSection, DetailRow } from '../components/reports/reportsPrimitives'
 import { cn } from '../lib/utils'
-import {
-  dominiosSeed,
-  CNAME_TARGET,
-  NEXT_DOMINIO_ID,
-  formatDominioDate,
-  type Dominio,
-  type DominioStatus,
-} from '../data/dominiosData'
+import { CNAME_TARGET, type Dominio, type DominioStatus } from '../data/dominiosData'
+import { useDomains } from '../data/dominiosStore'
 
 /* ---------------------------- Status badge ---------------------------- */
 
@@ -54,46 +46,18 @@ function DomStatusBadge({ status }: { status: DominioStatus }) {
 export default function MeusDominios() {
   const { onOpenMobile } = useOutletContext<LayoutContext>()
 
-  const [dominios, setDominios] = useState<Dominio[]>(dominiosSeed)
+  // lista compartilhada — domínios são adicionados na tela Config. domínio
+  const { dominios, removeDominio, setPrimary, reverificar } = useDomains()
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
-  const [addOpen, setAddOpen] = useState(false)
 
   const selected = dominios.find((d) => d.id === selectedId) ?? null
   const deleting = dominios.find((d) => d.id === confirmDeleteId) ?? null
 
-  function setPrimary(id: number) {
-    setDominios((list) => list.map((d) => ({ ...d, primary: d.id === id })))
-  }
-
-  /** Simula a reverificação do DNS: entra em "Verificando" e volta "Ativo". */
-  function reverificar(id: number) {
-    setDominios((list) => list.map((d) => (d.id === id ? { ...d, status: 'Verificando' } : d)))
-    setTimeout(() => {
-      setDominios((list) => list.map((d) => (d.id === id ? { ...d, status: 'Ativo' } : d)))
-    }, 1800)
-  }
-
-  function removeDominio(id: number) {
-    setDominios((list) => list.filter((d) => d.id !== id))
+  function handleDelete(id: number) {
+    removeDominio(id)
     setConfirmDeleteId(null)
     if (selectedId === id) setSelectedId(null)
-  }
-
-  function addDominio(domain: string) {
-    const novo: Dominio = {
-      id: NEXT_DOMINIO_ID + dominios.length,
-      domain,
-      status: 'Verificando',
-      primary: dominios.length === 0,
-      addedAt: formatDominioDate(new Date()),
-    }
-    setDominios((list) => [novo, ...list])
-    setAddOpen(false)
-    // simula a propagação do DNS do domínio recém-adicionado
-    setTimeout(() => {
-      setDominios((list) => list.map((d) => (d.id === novo.id ? { ...d, status: 'Ativo' } : d)))
-    }, 2200)
   }
 
   return (
@@ -104,16 +68,10 @@ export default function MeusDominios() {
         onOpenMobile={onOpenMobile}
       />
 
-      {/* barra de ação */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted">
-          {dominios.length} {dominios.length === 1 ? 'domínio conectado' : 'domínios conectados'}
-        </p>
-        <Button onClick={() => setAddOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Adicionar domínio
-        </Button>
-      </div>
+      {/* contador */}
+      <p className="mb-6 text-sm text-muted">
+        {dominios.length} {dominios.length === 1 ? 'domínio conectado' : 'domínios conectados'}
+      </p>
 
       {/* lista de domínios */}
       {dominios.length === 0 ? (
@@ -123,12 +81,9 @@ export default function MeusDominios() {
           </span>
           <p className="mt-4 text-sm font-semibold text-foreground">Nenhum domínio conectado</p>
           <p className="mt-1 max-w-xs text-sm text-muted">
-            Adicione um domínio próprio para personalizar o endereço do seu checkout.
+            Adicione um domínio próprio na aba <span className="font-medium text-foreground">Config. domínio</span> para
+            personalizar o endereço do seu checkout.
           </p>
-          <Button onClick={() => setAddOpen(true)} className="mt-5">
-            <Plus className="h-4 w-4" />
-            Adicionar domínio
-          </Button>
         </div>
       ) : (
         <div className="space-y-3">
@@ -187,22 +142,13 @@ export default function MeusDominios() {
         )}
       </Drawer>
 
-      {/* modal de adicionar */}
-      {addOpen && (
-        <AddDomainModal
-          existing={dominios.map((d) => d.domain)}
-          onClose={() => setAddOpen(false)}
-          onAdd={addDominio}
-        />
-      )}
-
       {/* confirmação de exclusão */}
       {deleting && (
         <ConfirmDialog
           title="Excluir domínio"
           message={`Tem certeza que deseja remover pay.${deleting.domain}? O checkout deixará de responder neste endereço.`}
           confirmLabel="Excluir"
-          onConfirm={() => removeDominio(deleting.id)}
+          onConfirm={() => handleDelete(deleting.id)}
           onCancel={() => setConfirmDeleteId(null)}
         />
       )}
@@ -357,98 +303,6 @@ function CnameRow({
         )}
       </Button>
     </div>
-  )
-}
-
-/* ========================= Modal: adicionar ========================== */
-
-function AddDomainModal({
-  existing,
-  onClose,
-  onAdd,
-}: {
-  existing: string[]
-  onClose: () => void
-  onAdd: (domain: string) => void
-}) {
-  const [value, setValue] = useState('')
-
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
-
-  const clean = value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/^pay\./, '').replace(/\/.*$/, '')
-  const duplicate = clean !== '' && existing.includes(clean)
-  const valid = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(clean) && !duplicate
-
-  function submit() {
-    if (!valid) return
-    onAdd(clean)
-  }
-
-  return createPortal(
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose} />
-
-      <div className="relative z-10 w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl animate-fade-in sm:p-7">
-        <div className="mb-6 flex items-start justify-between gap-3">
-          <div>
-            <h3 className="flex items-center gap-2.5 text-lg font-bold text-foreground">
-              <span className="h-5 w-1.5 shrink-0 rounded-full bg-primary" />
-              Adicionar domínio
-            </h3>
-            <p className="mt-1.5 text-sm text-muted">Informe o domínio que você apontou para a Nummo via CNAME.</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1 text-muted transition-colors hover:bg-card-muted hover:text-foreground"
-            aria-label="Fechar"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <Field label="Domínio">
-          <div className="flex items-stretch overflow-hidden rounded-xl border border-border bg-input/60 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
-            <span className="flex shrink-0 items-center gap-1.5 border-r border-border bg-card-muted/50 px-3.5 text-sm font-medium text-muted">
-              <Globe className="h-4 w-4" />
-              pay.
-            </span>
-            <input
-              autoFocus
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && submit()}
-              placeholder="seudominio.com"
-              className="min-w-0 flex-1 bg-transparent px-3.5 py-2.5 text-sm text-foreground placeholder:text-faint focus:outline-none"
-            />
-          </div>
-        </Field>
-
-        {duplicate ? (
-          <p className="mt-2 text-xs text-negative">Este domínio já está na sua lista.</p>
-        ) : (
-          <p className="mt-2 text-xs text-muted">
-            Seu checkout ficará em <span className="font-mono text-foreground">pay.{clean || 'seudominio.com'}</span>
-          </p>
-        )}
-
-        <div className="mt-6 flex items-center justify-end gap-2.5">
-          <Button variant="outline" size="sm" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button size="sm" onClick={submit} disabled={!valid}>
-            <Plus className="h-4 w-4" />
-            Adicionar
-          </Button>
-        </div>
-      </div>
-    </div>,
-    document.body,
   )
 }
 

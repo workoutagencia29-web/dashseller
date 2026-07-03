@@ -5,7 +5,9 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  ShieldAlert,
+  AlertTriangle,
+  Gavel,
+  Wallet,
   Target,
   ArrowUpFromLine,
   type LucideIcon,
@@ -24,14 +26,21 @@ interface Notificacao {
   unread?: boolean
 }
 
-/** Notificações mock (sem backend) — vendas, disputas, saques e metas. */
+/**
+ * Notificações mock (sem backend). Cada item espelha um evento configurável:
+ * Venda aprovada/pendente/recusada (Notificações Pessoais) e meta batida,
+ * saldo baixo, chargeback, disputa (MED) e saque (Notificações da Conta).
+ * Rótulos e ícones batem com as seções de Configurações.
+ */
 const NOTIFICACOES: Notificacao[] = [
   { id: 1, icon: CheckCircle2, tone: 'success', title: 'Venda aprovada', desc: 'R$ 297,00 · Curso de Tráfego Pago', time: 'há 4 min', unread: true },
-  { id: 2, icon: Clock, tone: 'warning', title: 'Pagamento pendente', desc: 'R$ 497,00 · Mentoria Premium — aguardando Pix', time: 'há 26 min', unread: true },
-  { id: 3, icon: ShieldAlert, tone: 'danger', title: 'Nova disputa (MED)', desc: 'R$ 197,00 · Ebook Copywriting — responda em até 7 dias', time: 'há 1 h', unread: true },
-  { id: 4, icon: Target, tone: 'primary', title: 'Meta de faturamento batida', desc: 'Você atingiu R$ 250 mil no mês. Parabéns!', time: 'há 3 h' },
-  { id: 5, icon: ArrowUpFromLine, tone: 'info', title: 'Saque concluído', desc: 'R$ 12.000,00 enviados para Nubank · Conta 4471', time: 'ontem' },
-  { id: 6, icon: XCircle, tone: 'danger', title: 'Venda recusada', desc: 'R$ 89,90 · Planilha de Gestão — cartão negado', time: 'ontem' },
+  { id: 2, icon: Clock, tone: 'warning', title: 'Venda pendente', desc: 'R$ 497,00 · Mentoria Premium — aguardando Pix', time: 'há 26 min', unread: true },
+  { id: 3, icon: AlertTriangle, tone: 'danger', title: 'Chargeback aberto', desc: 'R$ 197,00 · Ebook Copywriting — contestação recebida', time: 'há 1 h', unread: true },
+  { id: 4, icon: Gavel, tone: 'danger', title: 'Nova disputa (MED)', desc: 'R$ 156,00 · Copy que Converte — responda em até 7 dias', time: 'há 3 h' },
+  { id: 5, icon: Target, tone: 'primary', title: 'Meta de faturamento batida', desc: 'Você atingiu R$ 250 mil no mês. Parabéns!', time: 'há 5 h' },
+  { id: 6, icon: Wallet, tone: 'warning', title: 'Saldo baixo', desc: 'Seu saldo disponível está abaixo do limite configurado', time: 'ontem' },
+  { id: 7, icon: ArrowUpFromLine, tone: 'info', title: 'Saque concluído', desc: 'R$ 12.000,00 enviados para Nubank · Conta 12345678-9', time: 'ontem' },
+  { id: 8, icon: XCircle, tone: 'danger', title: 'Venda recusada', desc: 'R$ 89,90 · Planilha de Gestão — cartão negado', time: 'ontem' },
 ]
 
 const TONES: Record<NotifTone, string> = {

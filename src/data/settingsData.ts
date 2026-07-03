@@ -62,9 +62,9 @@ export const webhookEvents = [
   { id: 'payment.approved', label: 'Pagamento Aprovado' },
   { id: 'payment.refused', label: 'Pagamento Recusado' },
   { id: 'payment.refunded', label: 'Pagamento Reembolsado' },
-  { id: 'balance.settled', label: 'Pagamento Pendente' },
+  { id: 'balance.settled', label: 'Saldo Liquidado' },
   { id: 'chargeback.opened', label: 'Chargeback em Aberto' },
-  { id: 'withdrawal.completed', label: 'Saque Efetuado' },
+  { id: 'withdrawal.completed', label: 'Saque concluído' },
 ]
 
 export const webhookHistory: WebhookDelivery[] = [
@@ -73,50 +73,6 @@ export const webhookHistory: WebhookDelivery[] = [
   { id: 3, event: 'chargeback.opened', httpStatus: 500, timestamp: '23/06/2026 21:44:51', success: false },
   { id: 4, event: 'payment.refused', httpStatus: 200, timestamp: '23/06/2026 17:10:09', success: true },
   { id: 5, event: 'payment.approved', httpStatus: 408, timestamp: '23/06/2026 12:03:30', success: false },
-]
-
-export type Role = 'Administrador' | 'Financeiro' | 'Visualizador'
-
-export interface TeamMember {
-  id: number
-  name: string
-  email: string
-  role: Role
-  status: 'Ativo' | 'Convite pendente'
-  avatarSeed: number
-}
-
-export const teamMembers: TeamMember[] = [
-  { id: 1, name: 'Pristia Candra', email: 'pristia@nummo.com', role: 'Administrador', status: 'Ativo', avatarSeed: 31 },
-  { id: 2, name: 'Jorge Mendes', email: 'jorge@nummo.com', role: 'Financeiro', status: 'Ativo', avatarSeed: 12 },
-  { id: 3, name: 'Marina Alves', email: 'marina@nummo.com', role: 'Visualizador', status: 'Ativo', avatarSeed: 47 },
-  { id: 4, name: '—', email: 'novo.membro@email.com', role: 'Financeiro', status: 'Convite pendente', avatarSeed: 5 },
-]
-
-export const roles: Role[] = ['Administrador', 'Financeiro', 'Visualizador']
-
-/** Matriz de permissões: o que cada papel pode fazer. */
-export const permissions: { capability: string; access: Record<Role, boolean> }[] = [
-  { capability: 'Ver dashboard e relatórios', access: { Administrador: true, Financeiro: true, Visualizador: true } },
-  { capability: 'Gerenciar produtos', access: { Administrador: true, Financeiro: false, Visualizador: false } },
-  { capability: 'Sacar e gerenciar saldo', access: { Administrador: true, Financeiro: true, Visualizador: false } },
-  { capability: 'Editar dados bancários', access: { Administrador: true, Financeiro: true, Visualizador: false } },
-  { capability: 'Gerenciar webhooks', access: { Administrador: true, Financeiro: false, Visualizador: false } },
-  { capability: 'Convidar / remover membros', access: { Administrador: true, Financeiro: false, Visualizador: false } },
-]
-
-export interface AuditEntry {
-  id: number
-  member: string
-  action: string
-  datetime: string
-}
-
-export const auditLog: AuditEntry[] = [
-  { id: 1, member: 'Jorge Mendes', action: 'Solicitou saque de R$ 5.000,00', datetime: '24/06/2026 09:20' },
-  { id: 2, member: 'Pristia Candra', action: 'Adicionou conta bancária (Itaú)', datetime: '23/06/2026 16:05' },
-  { id: 3, member: 'Marina Alves', action: 'Exportou relatório de vendas', datetime: '23/06/2026 11:48' },
-  { id: 4, member: 'Pristia Candra', action: 'Alterou o endpoint de webhook', datetime: '22/06/2026 19:32' },
 ]
 
 /** Eventos de venda que disparam notificações pessoais. */

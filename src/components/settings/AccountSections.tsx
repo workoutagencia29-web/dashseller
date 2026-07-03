@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Loader2,
   Landmark,
@@ -7,16 +8,14 @@ import {
   Trash2,
   Send,
   CheckCircle2,
-  UserPlus,
   Check,
   X,
   Wallet,
   AlertTriangle,
-  Mails,
+  ArrowUpFromLine,
   Gavel,
   Target,
 } from 'lucide-react'
-import { Avatar } from '../ui/Avatar'
 import {
   SettingsCard,
   SubBlock,
@@ -35,19 +34,35 @@ import {
   bankAccounts as initialBankAccounts,
   type BankAccount,
   webhookEvents,
-  teamMembers as initialMembers,
-  roles,
-  permissions,
-  auditLog,
 } from '../../data/settingsData'
 
 /* ------------------------------- Modal ------------------------------- */
 
 function Modal({ open, title, onClose, children }: { open: boolean; title: string; onClose: () => void; children: ReactNode }) {
+  useEffect(() => {
+    if (!open) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    // trava o scroll do fundo enquanto o modal está aberto (padrão dos outros overlays)
+    const main = document.querySelector('main')
+    const prevMain = main?.style.overflow ?? ''
+    const html = document.documentElement
+    const prevHtml = html.style.overflow
+    if (main) main.style.overflow = 'hidden'
+    html.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      if (main) main.style.overflow = prevMain
+      html.style.overflow = prevHtml
+    }
+  }, [open, onClose])
+
   if (!open) return null
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose} />
       <div className="relative z-10 w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl animate-fade-in">
         <div className="mb-5 flex items-center justify-between">
           <h3 className="text-lg font-bold text-foreground">{title}</h3>
@@ -57,7 +72,8 @@ function Modal({ open, title, onClose, children }: { open: boolean; title: strin
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -176,7 +192,16 @@ export function BankSection() {
     setAccounts((list) => list.map((a) => ({ ...a, primary: a.id === id })))
   }
   function remove(id: number) {
-    setAccounts((list) => list.filter((a) => a.id !== id))
+    setAccounts((list) => {
+      const removed = list.find((a) => a.id === id)
+      const next = list.filter((a) => a.id !== id)
+      // se removeu a principal, reeleger uma nova (preferindo Validada) — nunca ficar sem principal
+      if (removed?.primary && next.length && !next.some((a) => a.primary)) {
+        const cand = next.find((a) => a.status === 'Validada') ?? next[0]
+        return next.map((a) => ({ ...a, primary: a.id === cand.id }))
+      }
+      return next
+    })
   }
   function addAccount() {
     if (accounts.length >= MAX_ACCOUNTS) return
@@ -374,123 +399,14 @@ export function WebhooksSection() {
   )
 }
 
-/* ------------------------------- Equipe ------------------------------- */
-
-export function TeamSection() {
-  const [members, setMembers] = useState(initialMembers)
-
-  return (
-    <SettingsCard id="equipe" title="Equipe" description="Convide membros e defina o que cada um pode fazer.">
-      <div className="space-y-6">
-        {/* convidar */}
-        <SubBlock>
-          <div className="flex flex-wrap items-end gap-3">
-            <Field label="Convidar por e-mail" className="min-w-[200px] flex-1">
-              <Input type="email" placeholder="nome@email.com" />
-            </Field>
-            <Field label="Papel" className="w-40">
-              <Select defaultValue="Financeiro">
-                {roles.map((r) => (
-                  <option key={r}>{r}</option>
-                ))}
-              </Select>
-            </Field>
-            <Button>
-              <UserPlus className="h-4 w-4" /> Enviar convite
-            </Button>
-          </div>
-        </SubBlock>
-
-        {/* membros */}
-        <SubBlock title="Membros">
-          <div className="space-y-2">
-            {members.map((m) => (
-              <div key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card-muted/30 p-3.5">
-                <div className="flex items-center gap-3">
-                  {m.status === 'Ativo' ? (
-                    <Avatar name={m.name} seed={m.avatarSeed} size={38} />
-                  ) : (
-                    <div className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-card-muted text-muted">
-                      <Mails className="h-4 w-4" />
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{m.status === 'Ativo' ? m.name : m.email}</p>
-                    <p className="text-xs text-muted">{m.status === 'Ativo' ? m.email : 'Convite pendente'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge tone={m.role === 'Administrador' ? 'info' : 'neutral'}>{m.role}</Badge>
-                  {m.status === 'Convite pendente' && (
-                    <Button size="sm" variant="outline">Reenviar</Button>
-                  )}
-                  <Button size="sm" variant="ghost" onClick={() => setMembers((l) => l.filter((x) => x.id !== m.id))} aria-label="Remover membro">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </SubBlock>
-
-        {/* permissões */}
-        <SubBlock title="Permissões por papel">
-          <div className="scrollbar-thin overflow-x-auto rounded-2xl border border-border">
-            <table className="w-full min-w-[520px] text-sm">
-              <thead>
-                <tr className="border-b border-border bg-card-muted/30 text-left">
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted">Permissão</th>
-                  {roles.map((r) => (
-                    <th key={r} className="px-3 py-3 text-center text-xs font-semibold text-muted">{r}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {permissions.map((p) => (
-                  <tr key={p.capability} className="border-b border-border/60 last:border-0">
-                    <td className="px-4 py-3 text-foreground">{p.capability}</td>
-                    {roles.map((r) => (
-                      <td key={r} className="px-3 py-3 text-center">
-                        {p.access[r] ? (
-                          <Check className="mx-auto h-4 w-4 text-positive" strokeWidth={2.5} />
-                        ) : (
-                          <X className="mx-auto h-4 w-4 text-faint" />
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </SubBlock>
-
-        {/* auditoria */}
-        <SubBlock title="Log de ações (auditoria)">
-          <div className="space-y-2">
-            {auditLog.map((a) => (
-              <div key={a.id} className="flex items-center justify-between gap-3 rounded-xl border border-border px-4 py-2.5 text-sm">
-                <div>
-                  <span className="font-medium text-foreground">{a.member}</span>
-                  <span className="text-muted"> — {a.action}</span>
-                </div>
-                <span className="shrink-0 text-xs text-muted">{a.datetime}</span>
-              </div>
-            ))}
-          </div>
-        </SubBlock>
-      </div>
-    </SettingsCard>
-  )
-}
-
 /* --------------------- Notificações da Conta -------------------------- */
 
 export function AccountNotificationsSection() {
   const [revenueGoal, setRevenueGoal] = useState(true)
   const [lowBalance, setLowBalance] = useState(true)
   const [chargeback, setChargeback] = useState(true)
-  const [dispute, setDispute] = useState(false)
+  const [dispute, setDispute] = useState(true)
+  const [withdrawal, setWithdrawal] = useState(true)
 
   return (
     <SettingsCard id="notif-conta" title="Notificações da Conta" description="Alertas que aparecem nas notificações dentro da dashboard.">
@@ -525,6 +441,14 @@ export function AccountNotificationsSection() {
           description="Seja avisado quando uma nova disputa for registrada."
           checked={dispute}
           onChange={setDispute}
+        />
+
+        <ToggleRow
+          icon={<ArrowUpFromLine className="h-5 w-5" />}
+          label="Aviso de saque concluído"
+          description="Seja avisado quando um saque for concluído."
+          checked={withdrawal}
+          onChange={setWithdrawal}
         />
       </div>
     </SettingsCard>

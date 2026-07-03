@@ -8,7 +8,6 @@ import { ReportsLayout } from './components/reports/ReportsLayout'
 import { ClientesTab } from './components/reports/ClientesTab'
 import { EntradasTab } from './components/reports/EntradasTab'
 import { SaidasTab } from './components/reports/SaidasTab'
-import AssinaturaDetalhe from './pages/AssinaturaDetalhe'
 import { FinanceiroLayout } from './components/financeiro/FinanceiroLayout'
 import { GeralTab } from './components/financeiro/GeralTab'
 import { AssinaturasTab } from './components/financeiro/AssinaturasTab'
@@ -16,12 +15,15 @@ import { LinkPagamentoTab } from './components/financeiro/LinkPagamentoTab'
 import { ContestacoesTab } from './components/financeiro/ContestacoesTab'
 import { TaxasTab } from './components/financeiro/TaxasTab'
 import Webhooks from './pages/Webhooks'
+import ChavesApi from './pages/ChavesApi'
+import Integracoes from './pages/Integracoes'
 import ConfigDominio from './pages/ConfigDominio'
 import MeusDominios from './pages/MeusDominios'
 import GerenciadorAfiliados from './pages/GerenciadorAfiliados'
 import MeusAfiliados from './pages/MeusAfiliados'
 import { Placeholder } from './pages/Placeholder'
 import { navItems } from './data/mockData'
+import { DomainsProvider } from './data/dominiosStore'
 
 /** Sub-rotas com página própria — não geram placeholder automático. */
 const EXPLICIT_CHILD_PATHS = new Set([
@@ -30,10 +32,13 @@ const EXPLICIT_CHILD_PATHS = new Set([
   '/afiliados/gerenciador',
   '/afiliados/meus-afiliados',
   '/integracoes/webhooks',
+  '/integracoes/chaves-de-api',
+  '/integracoes/conexoes',
 ])
 
 export default function App() {
   return (
+    <DomainsProvider>
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
@@ -56,7 +61,6 @@ export default function App() {
           <Route path="/financeiro/contestacoes" element={<ContestacoesTab />} />
           <Route path="/financeiro/taxas" element={<TaxasTab />} />
         </Route>
-        <Route path="/financeiro/assinaturas/:id" element={<AssinaturaDetalhe />} />
 
         {/* Produto — domínios do checkout */}
         <Route path="/produto/config-dominio" element={<ConfigDominio />} />
@@ -68,6 +72,8 @@ export default function App() {
 
         {/* Integrações — Webhooks (movido das Configurações) */}
         <Route path="/integracoes/webhooks" element={<Webhooks />} />
+        <Route path="/integracoes/chaves-de-api" element={<ChavesApi />} />
+        <Route path="/integracoes/conexoes" element={<Integracoes />} />
 
         {/* Telas em construção — geradas a partir do menu */}
         {navItems.flatMap((item) => {
@@ -98,5 +104,6 @@ export default function App() {
         <Route path="*" element={<Placeholder title="Página não encontrada" />} />
       </Route>
     </Routes>
+    </DomainsProvider>
   )
 }
