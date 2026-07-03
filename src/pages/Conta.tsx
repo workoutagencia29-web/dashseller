@@ -103,10 +103,10 @@ export default function Conta() {
             ))}
           </nav>
 
-          {/* Voltar pro Dashboard (rodapé do rail) */}
+          {/* Voltar pro Dashboard (rodapé do rail) — só no desktop; no mobile ele vai pro fim da página */}
           <Link
             to="/"
-            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-sm font-semibold text-muted transition-colors hover:border-primary/40 hover:bg-card-muted hover:text-foreground lg:mt-auto"
+            className="hidden w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-sm font-semibold text-muted transition-colors hover:border-primary/40 hover:bg-card-muted hover:text-foreground lg:mt-auto lg:flex"
           >
             <ArrowLeft className="h-4 w-4 shrink-0" />
             Voltar
@@ -119,6 +119,15 @@ export default function Conta() {
         <ProfileSection />
         <SecuritySection />
       </div>
+
+      {/* Voltar no mobile — no fim da página (no desktop ele vive no rail) */}
+      <Link
+        to="/"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-sm font-semibold text-muted transition-colors hover:border-primary/40 hover:bg-card-muted hover:text-foreground lg:hidden"
+      >
+        <ArrowLeft className="h-4 w-4 shrink-0" />
+        Voltar
+      </Link>
     </div>
   )
 }
