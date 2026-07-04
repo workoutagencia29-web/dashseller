@@ -4,6 +4,8 @@ import { clients, clientFirstPurchase, clientTransactions, type Client } from '.
 import { presetRange, addDays, startOfDay, type RangePreset, type DateRange } from '../../lib/date'
 import { ReportFilters, ReportCard, downloadCsv, Pagination, GhostRows } from './reportsPrimitives'
 import { ClienteDetalheModal } from './ClienteDetalheModal'
+import { useIsMobile } from '../../hooks/useIsMobile'
+import { cn } from '../../lib/utils'
 
 const PER_PAGE = 10
 
@@ -16,6 +18,7 @@ export function ClientesTab() {
   const [tick, setTick] = useState(0)
   const [selected, setSelected] = useState<Client | null>(null)
   const [page, setPage] = useState(1)
+  const isMobile = useIsMobile()
 
   const start = useMemo(() => addDays(startOfDay(new Date()), -60), [])
   const range = useMemo(
@@ -75,30 +78,43 @@ export function ClientesTab() {
               <th className="py-3 pr-3 font-semibold">Cliente</th>
               <th className="px-3 py-3 font-semibold">E-mail</th>
               <th className="px-3 py-3 font-semibold">CPF / CNPJ</th>
-              <th className="px-3 py-3 font-semibold">Primeira Compra</th>
-              <th className="py-3 pl-3 font-semibold">Ações</th>
+              {/* no mobile a coluna Ações some, então "Primeira Compra" vira a última (flush à direita) */}
+              <th className={cn('px-3 py-3 font-semibold', isMobile && 'pr-0')}>Primeira Compra</th>
+              {!isMobile && <th className="py-3 pl-3 font-semibold">Ações</th>}
             </tr>
           </thead>
           <tbody>
             {paged.map((c) => (
-              <tr key={c.id} className="border-b border-border/60 transition-colors last:border-0 hover:bg-card-muted/40">
+              <tr
+                key={c.id}
+                onClick={isMobile ? () => setSelected(c) : undefined}
+                className={cn(
+                  'border-b border-border/60 transition-colors last:border-0 hover:bg-card-muted/40',
+                  // no mobile a linha inteira abre os detalhes (a coluna Ações foi removida)
+                  isMobile && 'cursor-pointer active:bg-card-muted/60',
+                )}
+              >
                 <td className="whitespace-nowrap py-3.5 pr-3">
                   <span className="font-medium text-foreground">{c.name}</span>
                 </td>
                 <td className="whitespace-nowrap px-3 py-3.5 text-muted">{c.email}</td>
                 <td className="whitespace-nowrap px-3 py-3.5 text-muted">{c.document}</td>
-                <td className="whitespace-nowrap px-3 py-3.5 text-muted">{fmtDate(clientFirstPurchase(c.id))}</td>
-                <td className="py-3.5 pl-3">
-                  <button
-                    onClick={() => setSelected(c)}
-                    className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary"
-                  >
-                    Ações <ChevronRight className="h-3.5 w-3.5" />
-                  </button>
+                <td className={cn('whitespace-nowrap px-3 py-3.5 text-muted', isMobile && 'pr-0')}>
+                  {fmtDate(clientFirstPurchase(c.id))}
                 </td>
+                {!isMobile && (
+                  <td className="py-3.5 pl-3">
+                    <button
+                      onClick={() => setSelected(c)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary"
+                    >
+                      Ações <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
-            <GhostRows count={paged.length === 0 ? 0 : PER_PAGE - paged.length} colSpan={5} />
+            <GhostRows count={paged.length === 0 ? 0 : PER_PAGE - paged.length} colSpan={isMobile ? 4 : 5} />
           </tbody>
         </table>
         {rows.length === 0 && <p className="py-12 text-center text-sm text-muted">Nenhum cliente encontrado para os filtros atuais.</p>}
