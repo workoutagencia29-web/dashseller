@@ -6,7 +6,7 @@ import {
   Eye,
   EyeOff,
   ArrowUp,
-  Layers,
+  Box,
   ArrowUpFromLine,
   List,
   LayoutGrid,
@@ -89,7 +89,7 @@ function BalanceCard() {
 
   return (
     <div
-      className="relative overflow-hidden rounded-3xl p-6"
+      className="relative overflow-hidden rounded-3xl p-6 shadow-glow"
       style={{ background: 'linear-gradient(135deg, #15347f 0%, #2153c9 52%, #2f6bff 100%)' }}
     >
       {/* mapa-múndi (marca d'água) — mesma máscara do card do desktop */}
@@ -117,7 +117,7 @@ function BalanceCard() {
             type="button"
             onClick={() => setHidden((h) => !h)}
             aria-label={hidden ? 'Mostrar saldo' : 'Ocultar saldo'}
-            className="-my-1.5 -mr-2 flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 active:bg-white/10"
+            className="-mr-1 -mt-1 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white/90 backdrop-blur-sm transition-colors hover:bg-white/20 active:bg-white/20"
           >
             {hidden ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
           </button>
@@ -127,12 +127,12 @@ function BalanceCard() {
           {hidden ? 'R$ ••••••' : formatCurrency(saldo)}
         </p>
 
-        <div className="mt-3 flex items-center gap-1.5 text-sm">
-          <ArrowUp className="h-4 w-4 text-emerald-300" strokeWidth={2.5} />
-          <span className="font-semibold text-emerald-300">
+        <div className="mt-4 flex items-center gap-2.5">
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-2.5 py-1 text-[13px] font-semibold text-emerald-300">
+            <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.5} />
             {delta.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%
           </span>
-          <span className="text-white/60">· últimos 7 dias</span>
+          <span className="text-sm text-white/60">últimos 7 dias</span>
         </div>
 
         <button
@@ -160,14 +160,14 @@ interface QuickAction {
 function QuickActions({ onSoon }: { onSoon: (label: string) => void }) {
   const navigate = useNavigate()
   const actions: QuickAction[] = [
-    { label: 'Planos', icon: Layers, soon: true, onClick: () => onSoon('Planos') },
-    { label: 'Sacar', icon: ArrowUpFromLine, onClick: () => navigate('/financeiro/geral', { state: { openSaque: true } }) },
+    { label: 'Planos', icon: Box, soon: true, onClick: () => onSoon('Planos') },
+    { label: 'Sacar', icon: ArrowUp, onClick: () => navigate('/financeiro/geral', { state: { openSaque: true } }) },
     { label: 'Extrato', icon: List, onClick: () => navigate('/financeiro/geral') },
     { label: 'Mais', icon: LayoutGrid, soon: true, onClick: () => onSoon('Mais') },
   ]
 
   return (
-    <div className="grid grid-cols-4 gap-2 rounded-3xl border border-border bg-card p-3">
+    <div className="grid grid-cols-4 gap-2 rounded-3xl border border-border bg-card p-3 shadow-glow">
       {actions.map((a) => (
         <button
           key={a.label}
@@ -175,7 +175,7 @@ function QuickActions({ onSoon }: { onSoon: (label: string) => void }) {
           onClick={a.onClick}
           className="flex flex-col items-center gap-2 rounded-2xl px-1 py-2 transition-colors active:bg-card-muted"
         >
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card-muted text-foreground">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border bg-card-muted text-foreground">
             <a.icon className="h-5 w-5" strokeWidth={2} />
           </span>
           <span className="text-xs font-medium text-muted">{a.label}</span>
