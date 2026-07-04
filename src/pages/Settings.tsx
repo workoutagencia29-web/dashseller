@@ -80,8 +80,8 @@ export default function Settings() {
             <p className="mt-1 text-sm text-muted">Gerencie as configurações do seu negócio.</p>
           </div>
 
-          {/* índice */}
-          <nav className="space-y-5">
+          {/* índice — só no desktop; no mobile as seções ficam empilhadas e o índice some */}
+          <nav className="hidden space-y-5 lg:block">
             {NAV.map((group) => (
               <div key={group.group}>
                 <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wide text-faint">
@@ -111,10 +111,10 @@ export default function Settings() {
             ))}
           </nav>
 
-          {/* Voltar pro Dashboard (rodapé do rail) */}
+          {/* Voltar pro Dashboard (rodapé do rail) — só no desktop; no mobile ele vai pro fim da página */}
           <Link
             to="/"
-            className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-sm font-semibold text-muted transition-colors hover:border-primary/40 hover:bg-card-muted hover:text-foreground lg:mt-auto"
+            className="hidden w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-sm font-semibold text-muted transition-colors hover:border-primary/40 hover:bg-card-muted hover:text-foreground lg:mt-auto lg:flex"
           >
             <ArrowLeft className="h-4 w-4 shrink-0" />
             Voltar
@@ -129,6 +129,15 @@ export default function Settings() {
         <PersonalNotificationsSection />
         <AccountNotificationsSection />
       </div>
+
+      {/* Voltar no mobile — no fim da página (no desktop ele vive no rail) */}
+      <Link
+        to="/"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-3 text-sm font-semibold text-muted transition-colors hover:border-primary/40 hover:bg-card-muted hover:text-foreground lg:hidden"
+      >
+        <ArrowLeft className="h-4 w-4 shrink-0" />
+        Voltar
+      </Link>
     </div>
   )
 }
