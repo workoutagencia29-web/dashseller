@@ -72,7 +72,10 @@ export function ClientesTab() {
 
       {/* tabela */}
       <div className="scrollbar-thin mt-5 overflow-x-auto">
-        <table className="w-full min-w-[680px] table-fixed border-collapse text-sm">
+        {/* no mobile a tabela fica mais larga (900px → ~225px por coluna) pra o e-mail
+            não encostar no CPF/CNPJ; as 4 colunas continuam iguais (table-fixed).
+            No desktop mantém 680px (lá o container é largo e não há conflito). */}
+        <table className="w-full min-w-[900px] table-fixed border-collapse text-sm lg:min-w-[680px]">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
               <th className="py-3 pr-3 font-semibold">Cliente</th>
