@@ -138,7 +138,7 @@ function BalanceCard() {
         <button
           type="button"
           onClick={() => navigate('/financeiro/geral', { state: { openSaque: true } })}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-white/15 py-3 text-sm font-bold uppercase tracking-wide text-white backdrop-blur-sm transition-colors hover:bg-white/25 active:bg-white/25"
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-background py-3 text-sm font-bold uppercase tracking-wide text-foreground shadow-lg shadow-black/25 transition-colors hover:bg-card-muted active:bg-card-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 dark:bg-[#0a1020] dark:text-white dark:hover:bg-[#111a33] dark:focus-visible:ring-white/40"
         >
           <ArrowUpFromLine className="h-4 w-4" />
           Solicitar saque
