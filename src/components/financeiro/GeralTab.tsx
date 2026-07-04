@@ -17,8 +17,9 @@ import { DateRangeFilter } from '../ui/DateRangeFilter'
 import { presetRange, addDays, startOfDay, type RangePreset, type DateRange } from '../../lib/date'
 import { cn, formatCurrency } from '../../lib/utils'
 import { Button, Field, Input, Select } from '../settings/primitives'
-import { StatusBadge, TypeBadge, Drawer, DetailRow, DrawerSection, Pagination, GhostRows, MultiSelect, SearchInput } from '../reports/reportsPrimitives'
+import { StatusBadge, TypeBadge, Drawer, DetailRow, DrawerSection, Pagination, GhostRows, MultiSelect, SearchInput, MobileFilters, type FilterSpec } from '../reports/reportsPrimitives'
 import { BalanceCard, InternalTabs, Modal } from './financeiroPrimitives'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 const fmtDateTime = (d: Date) =>
   `${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
@@ -101,10 +102,27 @@ export function GeralTab() {
   )
   const inRange = (d: Date) => d >= range.from && d <= range.to
 
+  const isMobile = useIsMobile()
+
   function handleChange(next: RangePreset, custom?: DateRange) {
     setPreset(next)
     if (next === 'custom' && custom) setCustomRange(custom)
   }
+
+  // período é comum às três abas internas; entra por último no painel de filtros do mobile
+  const dateSpec: FilterSpec = { kind: 'date', preset, customRange, onChange: handleChange }
+  const mobileFilters: FilterSpec[] =
+    internal === 'Extrato'
+      ? [{ kind: 'multi', label: 'Tipo', options: MOV_TIPOS, selected: movTipo, onChange: setMovTipo }, dateSpec]
+      : internal === 'Saques'
+        ? [
+            { kind: 'multi', label: 'Conta bancária', options: CONTA_OPTIONS, selected: saqueConta, onChange: setSaqueConta },
+            { kind: 'multi', label: 'Status', options: SAQUE_STATUSES, selected: saqueStatus, onChange: setSaqueStatus },
+            dateSpec,
+          ]
+        : [{ kind: 'multi', label: 'Status', options: ANTECIP_STATUSES, selected: antecipStatus, onChange: setAntecipStatus }, dateSpec]
+  const searchPlaceholder =
+    internal === 'Saques' ? 'Buscar conta ou ID' : internal === 'Antecipações' ? 'Buscar ID' : 'Buscar descrição, tipo ou ID'
 
   const q = search.trim().toLowerCase()
   const mov = movimentacoes.filter(
@@ -178,7 +196,8 @@ export function GeralTab() {
       <div className="rounded-3xl border border-border bg-card p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <InternalTabs tabs={['Extrato', 'Saques', 'Antecipações']} active={internal} onChange={setInternal} />
-          <div className="flex flex-wrap items-center gap-2.5">
+          {/* desktop: dropdowns em linha (inalterado) — some no mobile */}
+          <div className="hidden flex-wrap items-center gap-2.5 lg:flex">
             {internal === 'Extrato' && (
               <MultiSelect label="Tipo" options={MOV_TIPOS} selected={movTipo} onChange={setMovTipo} />
             )}
@@ -192,13 +211,16 @@ export function GeralTab() {
               <MultiSelect label="Status" options={ANTECIP_STATUSES} selected={antecipStatus} onChange={setAntecipStatus} />
             )}
             <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} />
-            <SearchInput
-              value={search}
-              onChange={setSearch}
-              placeholder={internal === 'Saques' ? 'Buscar conta ou ID' : internal === 'Antecipações' ? 'Buscar ID' : 'Buscar descrição, tipo ou ID'}
-            />
+            <SearchInput value={search} onChange={setSearch} placeholder={searchPlaceholder} />
           </div>
         </div>
+
+        {/* mobile: busca + botão "Filtros" → painel de baixo com chips (mesmo esquema do Relatório) */}
+        {isMobile && (
+          <div className="mt-4">
+            <MobileFilters search={search} onSearch={setSearch} searchPlaceholder={searchPlaceholder} filters={mobileFilters} />
+          </div>
+        )}
 
         <div className="scrollbar-thin mt-5 overflow-x-auto">
           {internal === 'Extrato' && (

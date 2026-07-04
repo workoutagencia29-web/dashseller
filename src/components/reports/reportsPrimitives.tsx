@@ -598,6 +598,59 @@ export function ReportFilters({
   )
 }
 
+/**
+ * Barra de filtros só-mobile (busca + botão "Filtros" → painel de baixo com chips).
+ * É o mesmo esquema do ReportFilters no mobile, porém SEM a barra de exportar —
+ * pra telas (ex.: Financeiro › Geral) que no desktop não têm CSV e não devem mudar.
+ * O desktop dessas telas continua renderizando seus próprios dropdowns; este
+ * componente deve ficar dentro de um wrapper `lg:hidden`.
+ */
+export function MobileFilters({
+  search,
+  onSearch,
+  searchPlaceholder,
+  filters,
+}: {
+  search: string
+  onSearch: (v: string) => void
+  searchPlaceholder: string
+  filters: FilterSpec[]
+}) {
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const activeCount = filters.filter(isSpecActive).length
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="min-w-0 flex-1">
+        <SearchInput value={search} onChange={onSearch} placeholder={searchPlaceholder} />
+      </div>
+      {filters.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          className="flex shrink-0 items-center gap-2 rounded-xl border border-border bg-input/60 px-3.5 py-2.5 text-sm font-medium text-foreground transition-colors active:bg-input"
+        >
+          <SlidersHorizontal className="h-4 w-4 text-muted" />
+          Filtros
+          {activeCount > 0 && (
+            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
+              {activeCount}
+            </span>
+          )}
+        </button>
+      )}
+
+      {sheetOpen && (
+        <FilterSheet
+          filters={filters}
+          onClear={() => filters.forEach((f) => (f.kind === 'date' ? f.onChange('all') : f.onChange([])))}
+          onClose={() => setSheetOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
 function FilterGroup({ spec }: { spec: FilterSpec }) {
   if (spec.kind === 'date') {
     return (
