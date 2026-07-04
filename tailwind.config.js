@@ -34,8 +34,6 @@ export default {
       boxShadow: {
         card: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
         glow: '0 0 40px -8px rgb(47 107 255 / 0.45)',
-        // glow direcional (só embaixo + um pouco nos lados, nada em cima) — usado nos cards da home mobile
-        'glow-bottom': '0 26px 50px -12px rgb(47 107 255 / 0.6)',
       },
       borderRadius: {
         '4xl': '2rem',

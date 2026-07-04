@@ -89,7 +89,7 @@ function BalanceCard() {
 
   return (
     <div
-      className="relative overflow-hidden rounded-3xl p-6 shadow-glow-bottom"
+      className="relative overflow-hidden rounded-3xl p-6 shadow-[0_24px_50px_-8px_rgb(47_107_255_/_0.65)]"
       style={{ background: 'linear-gradient(135deg, #15347f 0%, #2153c9 52%, #2f6bff 100%)' }}
     >
       {/* mapa-múndi (marca d'água) — mesma máscara do card do desktop */}
@@ -167,7 +167,7 @@ function QuickActions({ onSoon }: { onSoon: (label: string) => void }) {
   ]
 
   return (
-    <div className="grid grid-cols-4 gap-2 rounded-3xl border border-border bg-card p-3 shadow-glow-bottom">
+    <div className="grid grid-cols-4 gap-2 rounded-3xl border border-border bg-card p-3 shadow-[0_24px_50px_-8px_rgb(47_107_255_/_0.65)]">
       {actions.map((a) => (
         <button
           key={a.label}
