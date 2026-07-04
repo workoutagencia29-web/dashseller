@@ -21,6 +21,7 @@ import Integracoes from './pages/Integracoes'
 import ConfigDominio from './pages/ConfigDominio'
 import MeusDominios from './pages/MeusDominios'
 import Produtos from './pages/Produtos'
+import LinkPagamento from './pages/LinkPagamento'
 import GerenciadorAfiliados from './pages/GerenciadorAfiliados'
 import MeusAfiliados from './pages/MeusAfiliados'
 import { Placeholder } from './pages/Placeholder'
@@ -66,8 +67,9 @@ export default function App() {
           <Route path="/financeiro/taxas" element={<TaxasTab />} />
         </Route>
 
-        {/* Produtos — lista/gestão (aberta pela ação rápida da home mobile) */}
+        {/* Produtos + Links de pagamento — abertos pelas ações rápidas da home mobile */}
         <Route path="/produtos" element={<Produtos />} />
+        <Route path="/link-de-pagamento" element={<LinkPagamento />} />
 
         {/* Produto — domínios do checkout */}
         <Route path="/produto/config-dominio" element={<ConfigDominio />} />

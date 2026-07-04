@@ -9,7 +9,7 @@ import {
   Box,
   ArrowUpFromLine,
   List,
-  LayoutGrid,
+  Link2,
   type LucideIcon,
 } from 'lucide-react'
 import { stats } from '../../data/mockData'
@@ -166,16 +166,15 @@ interface QuickAction {
   label: string
   icon: LucideIcon
   onClick: () => void
-  soon?: boolean
 }
 
-function QuickActions({ onSoon }: { onSoon: (label: string) => void }) {
+function QuickActions() {
   const navigate = useNavigate()
   const actions: QuickAction[] = [
     { label: 'Produtos', icon: Box, onClick: () => navigate('/produtos') },
     { label: 'Sacar', icon: ArrowUp, onClick: () => navigate('/financeiro/geral', { state: { openSaque: true } }) },
     { label: 'Extrato', icon: List, onClick: () => navigate('/financeiro/geral') },
-    { label: 'Mais', icon: LayoutGrid, soon: true, onClick: () => onSoon('Mais') },
+    { label: 'Link', icon: Link2, onClick: () => navigate('/link-de-pagamento') },
   ]
 
   return (
@@ -283,7 +282,7 @@ export function MobileHome() {
     <div className="space-y-6 pb-2">
       <TopBar collapsed={collapsed} onSearch={() => showSoon('Busca')} onBell={() => setNotifOpen(true)} />
       <BalanceCard />
-      <QuickActions onSoon={showSoon} />
+      <QuickActions />
       <RecentTransactions />
 
       {notifOpen && <NotificationsModal onClose={() => setNotifOpen(false)} />}
