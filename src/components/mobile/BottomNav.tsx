@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { FileText, Wrench, Home, Wallet, User, type LucideIcon } from 'lucide-react'
+import { FileText, KeyRound, Home, Wallet, User, type LucideIcon } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
 interface Tab {
@@ -16,7 +16,7 @@ interface Tab {
 /** As 5 áreas mantidas no mobile. "Início" fica no centro, elevado. */
 const TABS: Tab[] = [
   { label: 'Relatório', icon: FileText, path: '/relatorio/entradas', match: '/relatorio' },
-  { label: 'Ferramentas', icon: Wrench, path: '/integracoes/chaves-de-api', match: '/integracoes', exclude: ['/integracoes/webhooks'] },
+  { label: "API's", icon: KeyRound, path: '/integracoes/chaves-de-api', match: '/integracoes', exclude: ['/integracoes/webhooks'] },
   { label: 'Início', icon: Home, path: '/', match: '/', center: true },
   { label: 'Financeiro', icon: Wallet, path: '/financeiro/geral', match: '/financeiro' },
   { label: 'Perfil', icon: User, path: '/perfil', match: '/perfil' },
