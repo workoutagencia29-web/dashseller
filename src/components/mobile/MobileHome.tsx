@@ -40,11 +40,21 @@ function TopBar({ collapsed, onSearch, onBell }: { collapsed: boolean; onSearch:
         onClick={() => navigate('/perfil')}
         aria-label="Abrir perfil"
         className={cn(
-          'origin-left rounded-full transition-transform duration-300 active:opacity-80',
-          collapsed && 'scale-[0.82]',
+          'flex min-w-0 items-center text-left transition-all duration-300 active:opacity-80',
+          collapsed ? 'gap-0' : 'gap-3',
         )}
       >
-        <Avatar name="Pedro Rossi" seed={31} size={44} src={photo ?? undefined} />
+        <Avatar name="Pedro Rossi" seed={31} size={44} src={photo ?? undefined} className="shrink-0" />
+        {/* saudação ao lado da foto — some quando o topo encolhe ao rolar */}
+        <div
+          className={cn(
+            'min-w-0 overflow-hidden transition-all duration-300',
+            collapsed ? 'max-w-0 opacity-0' : 'max-w-[220px] opacity-100',
+          )}
+        >
+          <p className="text-xs leading-tight text-muted">Bem-vindo de volta</p>
+          <p className="mt-0.5 truncate text-[15px] font-bold leading-tight text-foreground">Pedro Rossi</p>
+        </div>
       </button>
 
       <div className="flex items-center gap-1.5">
