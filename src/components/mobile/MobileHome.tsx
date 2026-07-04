@@ -172,7 +172,7 @@ interface QuickAction {
 function QuickActions({ onSoon }: { onSoon: (label: string) => void }) {
   const navigate = useNavigate()
   const actions: QuickAction[] = [
-    { label: 'Planos', icon: Box, soon: true, onClick: () => onSoon('Planos') },
+    { label: 'Produtos', icon: Box, soon: true, onClick: () => onSoon('Produtos') },
     { label: 'Sacar', icon: ArrowUp, onClick: () => navigate('/financeiro/geral', { state: { openSaque: true } }) },
     { label: 'Extrato', icon: List, onClick: () => navigate('/financeiro/geral') },
     { label: 'Mais', icon: LayoutGrid, soon: true, onClick: () => onSoon('Mais') },
