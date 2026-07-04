@@ -1,9 +1,12 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { NavLink } from 'react-router-dom'
-import { ChevronDown, ChevronLeft, ChevronRight, Check, Search, X, FileText, FileDown, FileArchive, RefreshCw, MoreVertical, type LucideIcon } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Check, Search, X, FileText, FileDown, FileArchive, RefreshCw, MoreVertical, SlidersHorizontal, type LucideIcon } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Badge, Button } from '../settings/primitives'
+import { DateRangeFilter } from '../ui/DateRangeFilter'
+import { useIsMobile } from '../../hooks/useIsMobile'
+import { PRESET_LABELS, type RangePreset, type DateRange } from '../../lib/date'
 
 /* ------------------------------- Abas -------------------------------- */
 
@@ -497,6 +500,195 @@ export function ExportButtons({ formats, onCsv, onRefresh }: { formats: ('CSV' |
         </div>
       )}
     </>
+  )
+}
+
+/* -------------------------- Filtros (toolbar) ------------------------- */
+
+/** Descreve um filtro de forma declarativa — o desktop renderiza o dropdown
+ *  normal; o mobile renderiza os chips dentro do painel "Filtros". */
+export type FilterSpec =
+  | { kind: 'date'; preset: RangePreset; customRange: DateRange | null; onChange: (p: RangePreset, custom?: DateRange) => void }
+  | { kind: 'multi'; label: string; options: string[]; selected: string[]; onChange: (v: string[]) => void }
+
+const DATE_PRESETS: RangePreset[] = ['all', 'today', 'yesterday', 'last7', 'last15', 'last30', 'thisMonth']
+
+const isSpecActive = (f: FilterSpec) => (f.kind === 'date' ? f.preset !== 'all' : f.selected.length > 0)
+
+const chipClass = (active: boolean) =>
+  cn(
+    'rounded-full border px-3.5 py-2 text-sm font-medium transition-colors',
+    active ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-input/60 text-foreground hover:bg-input',
+  )
+
+/**
+ * Toolbar de filtros da Relatório.
+ * Desktop: linha única (dropdowns + busca à esquerda, exportar à direita) — igual antes.
+ * Mobile: busca + botão "Filtros" (com contador) e um painel deslizante com as opções em chips.
+ */
+export function ReportFilters({
+  search,
+  onSearch,
+  searchPlaceholder,
+  filters,
+  onCsv,
+  onRefresh,
+}: {
+  search: string
+  onSearch: (v: string) => void
+  searchPlaceholder: string
+  filters: FilterSpec[]
+  onCsv: () => void
+  onRefresh: () => void
+}) {
+  const isMobile = useIsMobile()
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const activeCount = filters.filter(isSpecActive).length
+
+  if (!isMobile) {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {filters.map((f, i) =>
+            f.kind === 'date' ? (
+              <DateRangeFilter key={i} preset={f.preset} customRange={f.customRange} onChange={f.onChange} />
+            ) : (
+              <MultiSelect key={i} label={f.label} options={f.options} selected={f.selected} onChange={f.onChange} />
+            ),
+          )}
+          <SearchInput value={search} onChange={onSearch} placeholder={searchPlaceholder} />
+        </div>
+        <ExportButtons formats={['CSV']} onCsv={onCsv} onRefresh={onRefresh} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <SearchInput value={search} onChange={onSearch} placeholder={searchPlaceholder} />
+        </div>
+        {filters.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            className="flex shrink-0 items-center gap-2 rounded-xl border border-border bg-input/60 px-3.5 py-2.5 text-sm font-medium text-foreground transition-colors active:bg-input"
+          >
+            <SlidersHorizontal className="h-4 w-4 text-muted" />
+            Filtros
+            {activeCount > 0 && (
+              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
+                {activeCount}
+              </span>
+            )}
+          </button>
+        )}
+      </div>
+      <ExportButtons formats={['CSV']} onCsv={onCsv} onRefresh={onRefresh} />
+
+      {sheetOpen && (
+        <FilterSheet
+          filters={filters}
+          onClear={() => filters.forEach((f) => (f.kind === 'date' ? f.onChange('all') : f.onChange([])))}
+          onClose={() => setSheetOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+function FilterGroup({ spec }: { spec: FilterSpec }) {
+  if (spec.kind === 'date') {
+    return (
+      <div>
+        <p className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-faint">Período</p>
+        <div className="flex flex-wrap gap-2">
+          {DATE_PRESETS.map((p) => (
+            <button key={p} type="button" onClick={() => spec.onChange(p)} className={chipClass(spec.preset === p)}>
+              {PRESET_LABELS[p]}
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+  return (
+    <div>
+      <p className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-faint">{spec.label}</p>
+      <div className="flex flex-wrap gap-2">
+        {spec.options.map((opt) => {
+          const active = spec.selected.includes(opt)
+          return (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => spec.onChange(active ? spec.selected.filter((s) => s !== opt) : [...spec.selected, opt])}
+              className={chipClass(active)}
+            >
+              {opt}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function FilterSheet({ filters, onClear, onClose }: { filters: FilterSpec[]; onClear: () => void; onClose: () => void }) {
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    const main = document.querySelector('main')
+    const prev = main?.style.overflow
+    if (main) main.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      if (main) main.style.overflow = prev ?? ''
+    }
+  }, [onClose])
+
+  return createPortal(
+    <div className="fixed inset-0 z-[80] flex flex-col justify-end lg:hidden" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+      <div
+        className="scrollbar-thin relative z-10 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-border bg-card px-5 pt-3 animate-fade-in"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}
+      >
+        <div className="sticky top-0 z-10 -mx-5 mb-1 bg-card px-5 pb-3">
+          <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border" />
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-foreground">Filtros</h3>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fechar"
+              className="rounded-lg p-1 text-muted transition-colors hover:bg-card-muted hover:text-foreground"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-5 py-1">
+          {filters.map((f, i) => (
+            <FilterGroup key={i} spec={f} />
+          ))}
+        </div>
+
+        <div className="mt-5 flex gap-3">
+          <Button variant="outline" size="md" className="flex-1" onClick={onClear}>
+            Limpar
+          </Button>
+          <Button size="md" className="flex-1" onClick={onClose}>
+            Ver resultados
+          </Button>
+        </div>
+      </div>
+    </div>,
+    document.body,
   )
 }
 

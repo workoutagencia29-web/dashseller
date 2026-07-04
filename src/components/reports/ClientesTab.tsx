@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronRight } from 'lucide-react'
 import { clients, clientFirstPurchase, clientTransactions, type Client } from '../../data/reportsData'
-import { DateRangeFilter } from '../ui/DateRangeFilter'
 import { presetRange, addDays, startOfDay, type RangePreset, type DateRange } from '../../lib/date'
-import { SearchInput, ExportButtons, ReportCard, downloadCsv, Pagination, GhostRows } from './reportsPrimitives'
+import { ReportFilters, ReportCard, downloadCsv, Pagination, GhostRows } from './reportsPrimitives'
 import { ClienteDetalheModal } from './ClienteDetalheModal'
 
 const PER_PAGE = 10
@@ -59,13 +58,14 @@ export function ClientesTab() {
   return (
     <ReportCard>
       {/* toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} />
-          <SearchInput value={search} onChange={setSearch} placeholder="Buscar nome, CPF ou CNPJ" />
-        </div>
-        <ExportButtons formats={['CSV']} onCsv={exportCsv} onRefresh={() => setTick((t) => t + 1)} />
-      </div>
+      <ReportFilters
+        search={search}
+        onSearch={setSearch}
+        searchPlaceholder="Buscar nome, CPF ou CNPJ"
+        onCsv={exportCsv}
+        onRefresh={() => setTick((t) => t + 1)}
+        filters={[{ kind: 'date', preset, customRange, onChange: handleChange }]}
+      />
 
       {/* tabela */}
       <div className="scrollbar-thin mt-5 overflow-x-auto">

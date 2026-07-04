@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { clients, entradas, type Entrada } from '../../data/reportsData'
-import { DateRangeFilter } from '../ui/DateRangeFilter'
 import { presetRange, addDays, startOfDay, type RangePreset, type DateRange } from '../../lib/date'
 import { formatCurrency } from '../../lib/utils'
-import { MultiSelect, SearchInput, ExportButtons, ReportCard, StatusBadge, downloadCsv, Pagination, GhostRows } from './reportsPrimitives'
+import { ReportFilters, ReportCard, StatusBadge, downloadCsv, Pagination, GhostRows } from './reportsPrimitives'
 import { EntradaDrawer } from './EntradaDrawer'
 
 const PER_PAGE = 10
@@ -79,15 +78,18 @@ export function EntradasTab() {
   return (
     <ReportCard>
       {/* filtros */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} />
-          <MultiSelect label="Forma de pagamento" options={PAY_METHODS} selected={pay} onChange={setPay} />
-          <MultiSelect label="Status" options={STATUSES} selected={status} onChange={setStatus} />
-          <SearchInput value={search} onChange={setSearch} placeholder="Buscar nome, CPF, CNPJ ou ID" />
-        </div>
-        <ExportButtons formats={['CSV']} onCsv={exportCsv} onRefresh={() => setTick((t) => t + 1)} />
-      </div>
+      <ReportFilters
+        search={search}
+        onSearch={setSearch}
+        searchPlaceholder="Buscar nome, CPF, CNPJ ou ID"
+        onCsv={exportCsv}
+        onRefresh={() => setTick((t) => t + 1)}
+        filters={[
+          { kind: 'date', preset, customRange, onChange: handleChange },
+          { kind: 'multi', label: 'Forma de pagamento', options: PAY_METHODS, selected: pay, onChange: setPay },
+          { kind: 'multi', label: 'Status', options: STATUSES, selected: status, onChange: setStatus },
+        ]}
+      />
 
       {/* tabela */}
       <div className="scrollbar-thin mt-5 overflow-x-auto">

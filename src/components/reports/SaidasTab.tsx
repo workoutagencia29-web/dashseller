@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Download } from 'lucide-react'
 import { saidas, type Saida } from '../../data/reportsData'
-import { DateRangeFilter } from '../ui/DateRangeFilter'
 import { presetRange, addDays, startOfDay, type RangePreset, type DateRange } from '../../lib/date'
 import { formatCurrency } from '../../lib/utils'
 import { Button } from '../settings/primitives'
 import {
-  MultiSelect,
-  SearchInput,
-  ExportButtons,
+  ReportFilters,
   ReportCard,
   StatusBadge,
   TypeBadge,
@@ -105,15 +102,18 @@ export function SaidasTab() {
   return (
     <ReportCard>
       {/* filtros */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} />
-          <MultiSelect label="Tipo de operação" options={TYPES} selected={types} onChange={setTypes} />
-          <MultiSelect label="Status" options={STATUSES} selected={status} onChange={setStatus} />
-          <SearchInput value={search} onChange={setSearch} placeholder="Buscar destinatário ou ID" />
-        </div>
-        <ExportButtons formats={['CSV']} onCsv={exportCsv} onRefresh={() => setTick((t) => t + 1)} />
-      </div>
+      <ReportFilters
+        search={search}
+        onSearch={setSearch}
+        searchPlaceholder="Buscar destinatário ou ID"
+        onCsv={exportCsv}
+        onRefresh={() => setTick((t) => t + 1)}
+        filters={[
+          { kind: 'date', preset, customRange, onChange: handleChange },
+          { kind: 'multi', label: 'Tipo de operação', options: TYPES, selected: types, onChange: setTypes },
+          { kind: 'multi', label: 'Status', options: STATUSES, selected: status, onChange: setStatus },
+        ]}
+      />
 
       {/* tabela */}
       <div className="scrollbar-thin mt-5 overflow-x-auto">
