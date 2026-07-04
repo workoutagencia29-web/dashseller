@@ -16,6 +16,7 @@ import { useTheme } from '../context/ThemeContext'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useScrollCollapse } from '../hooks/useScrollCollapse'
 import { useProfilePhoto } from '../data/profileStore'
+import { useDomains } from '../data/dominiosStore'
 import { cn } from '../lib/utils'
 
 /**
@@ -53,18 +54,64 @@ function Row({ item }: { item: RowItem }) {
   )
 }
 
+/* -------------------- Card da grade (Conta/Config/etc) ----------------- */
+
+interface HubCard {
+  label: string
+  sub: string
+  icon: LucideIcon
+  count?: number
+  highlight?: boolean
+  onClick: () => void
+}
+
+function HubCardTile({ card }: { card: HubCard }) {
+  return (
+    <button
+      type="button"
+      onClick={card.onClick}
+      className={cn(
+        'flex flex-col rounded-3xl border p-4 text-left transition-colors',
+        card.highlight
+          ? 'border-primary/60 bg-primary/10 shadow-[0_0_28px_-10px_rgb(47_107_255_/_0.6)]'
+          : 'border-border bg-card active:bg-card-muted',
+      )}
+    >
+      <div className="flex items-start justify-between">
+        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+          <card.icon className="h-[22px] w-[22px]" strokeWidth={2} />
+        </span>
+        {card.count !== undefined && (
+          <span className="text-2xl font-bold leading-none text-foreground">{card.count}</span>
+        )}
+      </div>
+      <p className="mt-4 font-bold text-foreground">{card.label}</p>
+      <p className="mt-0.5 text-[13px] text-muted">{card.sub}</p>
+    </button>
+  )
+}
+
 export default function Perfil() {
   const navigate = useNavigate()
   const { theme, setTheme } = useTheme()
   const isMobile = useIsMobile()
   const collapsed = useScrollCollapse(16, isMobile)
   const photo = useProfilePhoto()
+  const { dominios } = useDomains()
+  const activeDomains = dominios.filter((d) => d.status === 'Ativo').length
 
-  const conta: RowItem[] = [
-    { label: 'Conta', icon: User, onClick: () => navigate('/conta') },
-    { label: 'Configurações', icon: Settings, onClick: () => navigate('/configuracoes') },
-    { label: 'Meus domínios', icon: Globe, onClick: () => navigate('/produto/meus-dominios') },
-    { label: 'Webhooks', icon: Webhook, onClick: () => navigate('/integracoes/webhooks') },
+  const cards: HubCard[] = [
+    { label: 'Conta', sub: 'Dados pessoais', icon: User, onClick: () => navigate('/conta') },
+    { label: 'Config.', sub: 'Preferências', icon: Settings, onClick: () => navigate('/configuracoes') },
+    {
+      label: 'Meus domínios',
+      sub: `${activeDomains} ativos`,
+      icon: Globe,
+      count: dominios.length,
+      highlight: true,
+      onClick: () => navigate('/produto/meus-dominios'),
+    },
+    { label: 'Webhooks', sub: '6 eventos', icon: Webhook, count: 6, onClick: () => navigate('/integracoes/webhooks') },
   ]
   const ajuda: RowItem[] = [
     {
@@ -103,14 +150,11 @@ export default function Perfil() {
         </span>
       </button>
 
-      {/* conta */}
-      <div className="overflow-hidden rounded-3xl border border-border bg-card">
-        <p className="px-4 pt-4 text-xs font-semibold uppercase tracking-wide text-faint">Conta</p>
-        <div className="mt-1 divide-y divide-border/60">
-          {conta.map((item) => (
-            <Row key={item.label} item={item} />
-          ))}
-        </div>
+      {/* grade de cards — Conta / Config / Meus domínios / Webhooks */}
+      <div className="grid grid-cols-2 gap-3">
+        {cards.map((c) => (
+          <HubCardTile key={c.label} card={c} />
+        ))}
       </div>
 
       {/* tema */}
