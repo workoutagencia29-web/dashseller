@@ -72,17 +72,16 @@ export function ClientesTab() {
 
       {/* tabela */}
       <div className="scrollbar-thin mt-5 overflow-x-auto">
-        {/* no mobile a tabela fica mais larga (900px → ~225px por coluna) pra o e-mail
-            não encostar no CPF/CNPJ; as 4 colunas continuam iguais (table-fixed).
-            No desktop mantém 680px (lá o container é largo e não há conflito). */}
-        <table className="w-full min-w-[900px] table-fixed border-collapse text-sm lg:min-w-[680px]">
+        {/* no mobile só 3 colunas (Cliente/E-mail/CPF) → tabela em 720px = 240px cada,
+            iguais (table-fixed) e com folga pro e-mail. No desktop mantém 680px (5 colunas). */}
+        <table className="w-full min-w-[720px] table-fixed border-collapse text-sm lg:min-w-[680px]">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
               <th className="py-3 pr-3 font-semibold">Cliente</th>
               <th className="px-3 py-3 font-semibold">E-mail</th>
-              <th className="px-3 py-3 font-semibold">CPF / CNPJ</th>
-              {/* no mobile a coluna Ações some, então "Primeira Compra" vira a última (flush à direita) */}
-              <th className={cn('px-3 py-3 font-semibold', isMobile && 'pr-0')}>Primeira Compra</th>
+              {/* no mobile CPF/CNPJ é a última coluna (flush à direita) */}
+              <th className={cn('px-3 py-3 font-semibold', isMobile && 'pr-0')}>CPF / CNPJ</th>
+              {!isMobile && <th className="px-3 py-3 font-semibold">Primeira Compra</th>}
               {!isMobile && <th className="py-3 pl-3 font-semibold">Ações</th>}
             </tr>
           </thead>
@@ -101,10 +100,10 @@ export function ClientesTab() {
                   <span className="font-medium text-foreground">{c.name}</span>
                 </td>
                 <td className="whitespace-nowrap px-3 py-3.5 text-muted">{c.email}</td>
-                <td className="whitespace-nowrap px-3 py-3.5 text-muted">{c.document}</td>
-                <td className={cn('whitespace-nowrap px-3 py-3.5 text-muted', isMobile && 'pr-0')}>
-                  {fmtDate(clientFirstPurchase(c.id))}
-                </td>
+                <td className={cn('whitespace-nowrap px-3 py-3.5 text-muted', isMobile && 'pr-0')}>{c.document}</td>
+                {!isMobile && (
+                  <td className="whitespace-nowrap px-3 py-3.5 text-muted">{fmtDate(clientFirstPurchase(c.id))}</td>
+                )}
                 {!isMobile && (
                   <td className="py-3.5 pl-3">
                     <button
@@ -117,7 +116,7 @@ export function ClientesTab() {
                 )}
               </tr>
             ))}
-            <GhostRows count={paged.length === 0 ? 0 : PER_PAGE - paged.length} colSpan={isMobile ? 4 : 5} />
+            <GhostRows count={paged.length === 0 ? 0 : PER_PAGE - paged.length} colSpan={isMobile ? 3 : 5} />
           </tbody>
         </table>
         {rows.length === 0 && <p className="py-12 text-center text-sm text-muted">Nenhum cliente encontrado para os filtros atuais.</p>}
