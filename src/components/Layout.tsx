@@ -42,8 +42,8 @@ export function Layout() {
         ref={mainRef}
         className={cn(
           // overscroll-none trava o bounce/rubber-band (não "pula" nem mostra espaço vazio) em todas as páginas
-          // no mobile reserva espaço pra bottom nav (68px + safe-area do iOS); no desktop (lg) não há barra, então pb-0
-          'scrollbar-thin relative flex-1 overflow-y-auto overscroll-none pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0',
+          // pb-appnav reserva espaço pra bottom nav (compacto no navegador; + safe-area quando instalado); no desktop pb-0
+          'scrollbar-thin relative flex-1 overflow-y-auto overscroll-none pb-appnav lg:pb-0',
         )}
       >
         {/* menu da conta — só na Dashboard, no canto superior direito (desktop; no mobile a home tem sua própria top bar) */}

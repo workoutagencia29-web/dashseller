@@ -36,11 +36,8 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-sidebar/95 backdrop-blur-lg lg:hidden"
-      // respiro mínimo embaixo: no iPhone standalone usa a safe-area (~34px); no
-      // Safari/Chrome com barra do navegador a safe-area é 0, então garante ~16px
-      // pra os rótulos não colarem na barra do navegador.
-      style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)' }}
+      // bottom-nav-pad: compacta no navegador; usa a safe-area só quando instalado (standalone)
+      className="bottom-nav-pad fixed inset-x-0 bottom-0 z-40 border-t border-border bg-sidebar/95 backdrop-blur-lg lg:hidden"
       aria-label="Navegação principal"
     >
       <div className="mx-auto flex h-[68px] max-w-md items-stretch justify-around px-2">

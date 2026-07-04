@@ -154,6 +154,27 @@
     height: 100dvh;
   }
 
+  /* Espaço de baixo dependente do modo de exibição.
+     No NAVEGADOR (Safari/Chrome), o iOS com viewport-fit=cover super-reserva a
+     safe-area de baixo pro indicador de home — mas a barra do próprio navegador
+     já ocupa essa área, criando uma faixa vazia feia sob a bottom nav. Então a
+     safe-area só entra quando o app está INSTALADO (standalone), onde é real.
+     No navegador a barra fica compacta, encostando na barra do navegador. */
+  .bottom-nav-pad {
+    padding-bottom: 0.5rem;
+  }
+  .pb-appnav {
+    padding-bottom: 5.25rem; /* nav compacta (~68px) + folga, no navegador */
+  }
+  @media (display-mode: standalone) {
+    .bottom-nav-pad {
+      padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+    }
+    .pb-appnav {
+      padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+    }
+  }
+
   /* Thin, themed scrollbars */
   .scrollbar-thin {
     scrollbar-width: thin;
