@@ -79,17 +79,20 @@ function KeyField({
         {secret && (
           <Button variant="outline" size="sm" onClick={onToggleReveal} className="shrink-0" aria-label={revealed ? 'Ocultar' : 'Revelar'}>
             {revealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            {revealed ? 'Ocultar' : 'Revelar'}
+            {/* texto só no desktop; no mobile fica só o ícone */}
+            <span className="hidden lg:inline">{revealed ? 'Ocultar' : 'Revelar'}</span>
           </Button>
         )}
-        <Button variant="outline" size="sm" onClick={onCopy} className="shrink-0">
+        <Button variant="outline" size="sm" onClick={onCopy} className="shrink-0" aria-label={copied ? 'Copiado' : 'Copiar'}>
           {copied ? (
             <>
-              <Check className="h-3.5 w-3.5 text-positive" /> Copiado
+              <Check className="h-3.5 w-3.5 text-positive" />
+              <span className="hidden lg:inline">Copiado</span>
             </>
           ) : (
             <>
-              <Copy className="h-3.5 w-3.5" /> Copiar
+              <Copy className="h-3.5 w-3.5" />
+              <span className="hidden lg:inline">Copiar</span>
             </>
           )}
         </Button>

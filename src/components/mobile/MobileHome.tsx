@@ -232,7 +232,6 @@ function RecentTransactions() {
           const st = STATUS_MAP[e.status]
           return (
             <div key={e.id} className="flex items-center gap-3 py-3.5">
-              <Avatar name={c?.name ?? 'Cliente'} seed={c?.avatarSeed ?? e.id} size={40} />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold text-foreground">{c?.name ?? 'Cliente'}</p>
                 <p className="truncate text-[13px] text-muted">{e.product}</p>
