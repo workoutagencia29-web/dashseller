@@ -111,7 +111,7 @@ export default function Perfil() {
       highlight: true,
       onClick: () => navigate('/produto/meus-dominios'),
     },
-    { label: 'Webhooks', sub: '6 eventos', icon: Webhook, count: 6, onClick: () => navigate('/integracoes/webhooks') },
+    { label: 'Webhooks', sub: '6 eventos', icon: Webhook, count: 6, highlight: true, onClick: () => navigate('/integracoes/webhooks') },
   ]
   const ajuda: RowItem[] = [
     {
