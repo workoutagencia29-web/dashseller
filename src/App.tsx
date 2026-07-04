@@ -20,6 +20,7 @@ import ChavesApi from './pages/ChavesApi'
 import Integracoes from './pages/Integracoes'
 import ConfigDominio from './pages/ConfigDominio'
 import MeusDominios from './pages/MeusDominios'
+import Produtos from './pages/Produtos'
 import GerenciadorAfiliados from './pages/GerenciadorAfiliados'
 import MeusAfiliados from './pages/MeusAfiliados'
 import { Placeholder } from './pages/Placeholder'
@@ -64,6 +65,9 @@ export default function App() {
           <Route path="/financeiro/contestacoes" element={<ContestacoesTab />} />
           <Route path="/financeiro/taxas" element={<TaxasTab />} />
         </Route>
+
+        {/* Produtos — lista/gestão (aberta pela ação rápida da home mobile) */}
+        <Route path="/produtos" element={<Produtos />} />
 
         {/* Produto — domínios do checkout */}
         <Route path="/produto/config-dominio" element={<ConfigDominio />} />
