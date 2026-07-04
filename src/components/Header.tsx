@@ -20,7 +20,11 @@ export function Header({ title, subtitle, onOpenMobile }: HeaderProps) {
       className={cn(
         'mb-6 flex items-center gap-4',
         isMobile && 'sticky top-0 z-20 -mx-5 px-5 transition-all duration-300 sm:-mx-8 sm:px-8',
-        isMobile && (collapsed ? 'border-b border-border bg-background/85 py-3 backdrop-blur-lg' : 'py-2'),
+        // pt inclui env(safe-area-inset-top) pra não ficar sob a Dynamic Island; env()=0 no desktop/preview
+        isMobile &&
+          (collapsed
+            ? 'border-b border-border bg-background/85 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur-lg'
+            : 'pb-2 pt-[calc(env(safe-area-inset-top)+0.5rem)]'),
       )}
     >
       {/* hambúrguer escondido no mobile — a bottom nav (app) substitui a sidebar; o desktop já não mostrava */}

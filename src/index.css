@@ -146,6 +146,14 @@
 }
 
 @layer utilities {
+  /* Altura da casca do app. No iOS, 100vh inclui a área atrás da barra do Safari
+     (a UI "escapa"); 100dvh acompanha a viewport visível. A 1ª linha é o fallback
+     pra quem não suporta dvh; a 2ª vence onde há suporte. */
+  .app-shell-height {
+    height: 100vh;
+    height: 100dvh;
+  }
+
   /* Thin, themed scrollbars */
   .scrollbar-thin {
     scrollbar-width: thin;

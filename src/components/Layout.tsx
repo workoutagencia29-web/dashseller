@@ -26,7 +26,7 @@ export function Layout() {
   const section = '/' + (pathname.split('/')[1] ?? '')
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="app-shell-height flex overflow-hidden bg-background">
       <Sidebar
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed((c) => !c)}
@@ -42,8 +42,8 @@ export function Layout() {
         ref={mainRef}
         className={cn(
           // overscroll-none trava o bounce/rubber-band (não "pula" nem mostra espaço vazio) em todas as páginas
-          // pb-24 no mobile reserva espaço pra bottom nav; no desktop (lg) não há barra, então pb-0
-          'scrollbar-thin relative flex-1 overflow-y-auto overscroll-none pb-24 lg:pb-0',
+          // no mobile reserva espaço pra bottom nav (68px + safe-area do iOS); no desktop (lg) não há barra, então pb-0
+          'scrollbar-thin relative flex-1 overflow-y-auto overscroll-none pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0',
         )}
       >
         {/* menu da conta — só na Dashboard, no canto superior direito (desktop; no mobile a home tem sua própria top bar) */}

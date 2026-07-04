@@ -127,7 +127,11 @@ export default function Perfil() {
         className={cn(
           'font-bold tracking-tight text-foreground',
           isMobile && 'sticky top-0 z-20 -mx-5 px-5 transition-all duration-300 sm:-mx-8 sm:px-8',
-          isMobile && (collapsed ? 'border-b border-border bg-background/85 py-3 text-lg backdrop-blur-lg' : 'py-1 text-2xl'),
+          // pt inclui env(safe-area-inset-top) pra não ficar sob a Dynamic Island; env()=0 no desktop/preview
+          isMobile &&
+            (collapsed
+              ? 'border-b border-border bg-background/85 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] text-lg backdrop-blur-lg'
+              : 'pb-1 pt-[calc(env(safe-area-inset-top)+0.25rem)] text-2xl'),
           !isMobile && 'text-2xl',
         )}
       >

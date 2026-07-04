@@ -28,11 +28,13 @@ function TopBar({ collapsed, onSearch, onBell }: { collapsed: boolean; onSearch:
   return (
     <div
       className={cn(
-        // fixa no topo e encolhe ao rolar (sensação de app); -mx-5 estende o blur de ponta a ponta
+        // fixa no topo e encolhe ao rolar (sensação de app); -mx-5 estende o blur de ponta a ponta.
+        // pt inclui env(safe-area-inset-top): o conteúdo desce da Dynamic Island e o fundo/blur
+        // pinta o topo inteiro (no iPhone). No preview/desktop o env() é 0, então nada muda.
         'sticky top-0 z-30 -mx-5 flex items-center justify-between px-5 transition-all duration-300',
         collapsed
-          ? 'border-b border-border bg-background/80 py-2.5 backdrop-blur-lg'
-          : 'border-b border-transparent py-1.5',
+          ? 'border-b border-border bg-background/80 pb-2.5 pt-[calc(env(safe-area-inset-top)+0.625rem)] backdrop-blur-lg'
+          : 'border-b border-transparent pb-1.5 pt-[calc(env(safe-area-inset-top)+0.375rem)]',
       )}
     >
       <button
