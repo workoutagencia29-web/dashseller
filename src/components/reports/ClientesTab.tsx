@@ -72,15 +72,18 @@ export function ClientesTab() {
 
       {/* tabela */}
       <div className="scrollbar-thin mt-5 overflow-x-auto">
-        {/* no mobile só 3 colunas (Cliente/E-mail/CPF) → tabela em 720px = 240px cada,
-            iguais (table-fixed) e com folga pro e-mail. No desktop mantém 680px (5 colunas). */}
-        <table className="w-full min-w-[720px] table-fixed border-collapse text-sm lg:min-w-[680px]">
+        {/* no mobile são 3 colunas com larguras específicas: a Cliente é enxuta (130px,
+            cabe o maior nome ~111px + folga) pra o e-mail vir logo em seguida.
+            130 + 230 + 160 = 520px. No desktop as larguras são automáticas (table-fixed, 5 colunas). */}
+        <table className="w-full min-w-[520px] table-fixed border-collapse text-sm lg:min-w-[680px]">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
-              <th className="py-3 pr-3 font-semibold">Cliente</th>
-              <th className="px-3 py-3 font-semibold">E-mail</th>
+              <th style={isMobile ? { width: 130 } : undefined} className="py-3 pr-3 font-semibold">Cliente</th>
+              <th style={isMobile ? { width: 230 } : undefined} className="px-3 py-3 font-semibold">E-mail</th>
               {/* no mobile CPF/CNPJ é a última coluna (flush à direita) */}
-              <th className={cn('px-3 py-3 font-semibold', isMobile && 'pr-0')}>CPF / CNPJ</th>
+              <th style={isMobile ? { width: 160 } : undefined} className={cn('px-3 py-3 font-semibold', isMobile && 'pr-0')}>
+                CPF / CNPJ
+              </th>
               {!isMobile && <th className="px-3 py-3 font-semibold">Primeira Compra</th>}
               {!isMobile && <th className="py-3 pl-3 font-semibold">Ações</th>}
             </tr>
