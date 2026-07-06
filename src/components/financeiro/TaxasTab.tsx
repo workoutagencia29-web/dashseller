@@ -1,13 +1,10 @@
 import { QrCode, Code2, CreditCard, Wallet, Barcode, Check, type LucideIcon } from 'lucide-react'
 import { taxas } from '../../data/financeiroData'
-import { Button } from '../settings/primitives'
 
 /* -------------------------------------------------------------------------- */
 /* Cards de taxa — SÓ no desktop (lg+). No mobile mantém a tabela de sempre.   */
 /* Modelo: retângulo vertical (cabeçalho + número grande + botão + detalhes).  */
 /* -------------------------------------------------------------------------- */
-
-const GERENTE_WHATSAPP = 'https://wa.me/5511912002801'
 
 interface TaxaCard {
   method: string
@@ -79,14 +76,6 @@ function TaxaCardTile({ c }: { c: TaxaCard }) {
           {c.rateNote && <p className="mt-2 text-sm font-semibold text-primary">{c.rateNote}</p>}
           <p className="mt-2 text-sm text-muted">{c.fixed}</p>
         </div>
-
-        {/* botão */}
-        <Button
-          className="mt-6 w-full"
-          onClick={() => window.open(GERENTE_WHATSAPP, '_blank', 'noopener,noreferrer')}
-        >
-          Falar com gerente
-        </Button>
 
         {/* detalhes */}
         <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-faint">Detalhes</p>
