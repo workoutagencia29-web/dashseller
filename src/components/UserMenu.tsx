@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { User, UserRound, Settings, Headset, Bell, LogOut, type LucideIcon } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { NotificationsModal } from './NotificationsModal'
+import { FaturamentoBar } from './FaturamentoBar'
 
 /**
  * Menu da conta (Dashboard): um sino de notificações + o avatar redondo que
@@ -40,6 +41,9 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-2">
+      {/* barra de faturamento (níveis) — fica à esquerda do sino */}
+      <FaturamentoBar />
+
       {/* sino de notificações — abre o popup de notificações */}
       <button
         type="button"
