@@ -94,7 +94,7 @@ export function TeamPerformanceChart() {
           <span className="h-5 w-1.5 shrink-0 rounded-full bg-primary" />
           Desempenho de vendas
         </h2>
-        <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} />
+        <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} minDate={salesDataStart} />
       </div>
 
       {/* eixo Y = quantidade de vendas · eixo X = horas (hoje/ontem) ou datas */}
@@ -127,7 +127,8 @@ export function TeamPerformanceChart() {
               dataKey="vendas"
               stroke="#2f6bff"
               strokeWidth={3}
-              dot={false}
+              // 1 ponto só (período personalizado de um dia) não desenha linha — mostra o ponto
+              dot={data.length <= 1 ? { r: 4, fill: '#2f6bff' } : false}
               isAnimationActive={false}
               activeDot={{ r: 5, strokeWidth: 3, stroke: '#fff' }}
             />

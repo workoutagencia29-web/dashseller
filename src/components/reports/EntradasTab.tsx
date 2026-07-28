@@ -85,7 +85,7 @@ export function EntradasTab() {
         onCsv={exportCsv}
         onRefresh={() => setTick((t) => t + 1)}
         filters={[
-          { kind: 'date', preset, customRange, onChange: handleChange },
+          { kind: 'date', preset, customRange, onChange: handleChange, minDate: start },
           { kind: 'multi', label: 'Forma de pagamento', options: PAY_METHODS, selected: pay, onChange: setPay },
           { kind: 'multi', label: 'Status', options: STATUSES, selected: status, onChange: setStatus },
         ]}

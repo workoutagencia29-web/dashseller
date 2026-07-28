@@ -176,7 +176,7 @@ export function AssinaturasTab() {
           <div className="flex flex-wrap items-center gap-2.5">
             <MultiSelect label="Produto" options={PRODUCTS} selected={products} onChange={setProducts} />
             <MultiSelect label="Status" options={STATUSES} selected={status} onChange={setStatus} />
-            <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} />
+            <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} minDate={start} />
             <SearchInput value={search} onChange={setSearch} placeholder="Buscar comprador ou produto" />
           </div>
         </div>

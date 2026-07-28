@@ -109,7 +109,7 @@ export function SaidasTab() {
         onCsv={exportCsv}
         onRefresh={() => setTick((t) => t + 1)}
         filters={[
-          { kind: 'date', preset, customRange, onChange: handleChange },
+          { kind: 'date', preset, customRange, onChange: handleChange, minDate: start },
           { kind: 'multi', label: 'Tipo de operação', options: TYPES, selected: types, onChange: setTypes },
           { kind: 'multi', label: 'Status', options: STATUSES, selected: status, onChange: setStatus },
         ]}

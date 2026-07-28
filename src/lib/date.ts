@@ -15,6 +15,17 @@ export type RangePreset =
   | 'all'
   | 'custom'
 
+/** Ordem canônica dos presets — fonte única pro desktop e pro mobile (sem 'custom'). */
+export const PRESET_ORDER: RangePreset[] = [
+  'today',
+  'yesterday',
+  'last7',
+  'last15',
+  'last30',
+  'thisMonth',
+  'all',
+]
+
 export const PRESET_LABELS: Record<RangePreset, string> = {
   today: 'Hoje',
   yesterday: 'Ontem',
@@ -71,6 +82,18 @@ export function formatHour(d: Date): string {
 /** "dd/MM/yy" */
 export function formatShort(d: Date): string {
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${String(d.getFullYear()).slice(2)}`
+}
+
+/** Contagem inclusiva de dias: 12/07–19/07 = "8 dias"; 12/07–12/07 = "1 dia". */
+export function rangeDays(r: DateRange): string {
+  const n =
+    Math.round((startOfDay(r.to).getTime() - startOfDay(r.from).getTime()) / 86_400_000) + 1
+  return n === 1 ? '1 dia' : `${n} dias`
+}
+
+/** "12/07/26 – 19/07/26" */
+export function formatRangeShort(r: DateRange): string {
+  return `${formatShort(r.from)} – ${formatShort(r.to)}`
 }
 
 /** Resolve a preset into an absolute [from, to] range relative to now. */

@@ -110,7 +110,7 @@ export function GeralTab() {
   }
 
   // período é comum às três abas internas; entra por último no painel de filtros do mobile
-  const dateSpec: FilterSpec = { kind: 'date', preset, customRange, onChange: handleChange }
+  const dateSpec: FilterSpec = { kind: 'date', preset, customRange, onChange: handleChange, minDate: start }
   const mobileFilters: FilterSpec[] =
     internal === 'Extrato'
       ? [{ kind: 'multi', label: 'Tipo', options: MOV_TIPOS, selected: movTipo, onChange: setMovTipo }, dateSpec]
@@ -210,7 +210,7 @@ export function GeralTab() {
             {internal === 'Antecipações' && (
               <MultiSelect label="Status" options={ANTECIP_STATUSES} selected={antecipStatus} onChange={setAntecipStatus} />
             )}
-            <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} />
+            <DateRangeFilter preset={preset} customRange={customRange} onChange={handleChange} minDate={start} />
             <SearchInput value={search} onChange={setSearch} placeholder={searchPlaceholder} />
           </div>
         </div>

@@ -302,7 +302,7 @@ export default function GerenciadorAfiliados() {
               Afiliados
             </h3>
             <div className="flex flex-wrap items-center gap-2.5">
-              <DateRangeFilter preset={preset} customRange={customRange} onChange={handleRange} />
+              <DateRangeFilter preset={preset} customRange={customRange} onChange={handleRange} minDate={start} />
               <MultiSelect label="Status" options={STATUS_OPTIONS} selected={statusF} onChange={setStatusF} />
               <MultiSelect label="Produto" options={PRODUCT_POOL} selected={productF} onChange={setProductF} />
               <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome ou e-mail" />

@@ -89,60 +89,138 @@
   .chart-themed .recharts-wrapper:focus {
     outline: none;
   }
+}
 
-  /* react-day-picker — tema azul/dark (filtro "Período personalizado") */
-  .rdp-root {
-    --rdp-accent-color: rgb(var(--primary));
-    --rdp-accent-background-color: rgb(var(--primary) / 0.15);
-    --rdp-today-color: rgb(var(--primary));
-    --rdp-day-width: 36px;
-    --rdp-day-height: 36px;
-    --rdp-day_button-width: 34px;
-    --rdp-day_button-height: 34px;
-    --rdp-day_button-border-radius: 9px;
-    --rdp-selected-border: none;
-    --rdp-range_start-color: #fff;
-    --rdp-range_end-color: #fff;
-    --rdp-range_middle-background-color: rgb(var(--primary) / 0.14);
-    --rdp-range_middle-color: rgb(var(--foreground));
-    --rdp-disabled-opacity: 0.3;
-    --rdp-nav_button-height: 30px;
-    --rdp-nav_button-width: 30px;
-    margin: 0;
-    font-size: 13px;
-    color: rgb(var(--foreground));
-  }
-  .rdp-month_caption {
-    font-weight: 600;
-    color: rgb(var(--foreground));
-    text-transform: capitalize;
-  }
-  .rdp-weekday {
-    color: rgb(var(--faint));
-    font-weight: 500;
-    font-size: 11px;
-  }
-  .rdp-day_button {
-    color: rgb(var(--foreground));
-  }
-  .rdp-day_button:hover {
-    background-color: rgb(var(--card-muted));
-  }
-  .rdp-chevron {
-    fill: rgb(var(--muted));
-  }
-  .rdp-button_previous:hover .rdp-chevron,
-  .rdp-button_next:hover .rdp-chevron {
-    fill: rgb(var(--foreground));
-  }
-  .rdp-today:not(.rdp-selected) .rdp-day_button {
-    color: rgb(var(--primary));
-    font-weight: 700;
-  }
-  .rdp-outside {
-    opacity: 0.45;
-  }
+/* ------------------- react-day-picker — tema azul/dark -------------------
+   FORA do @layer components de propósito. O Tailwind faz tree-shaking do que
+   está dentro do layer: só mantém regras cuja classe aparece no código-fonte.
+   Como .rdp-* vem da lib e nunca é escrita num .tsx, o tema inteiro estava
+   sendo descartado silenciosamente do CSS final (por isso o cabeçalho ficava
+   com o 18px bold da lib e transbordava). Aqui as regras são emitidas sempre. */
+/* `.rdp-root.rdp-root` (classe dobrada) é proposital: a lib declara os mesmos
+   --rdp-* no seu próprio `.rdp-root` e o style.css dela entra DEPOIS deste arquivo,
+   então com especificidade igual ela vencia e nenhuma variável do app valia. */
+.rdp-root.rdp-root {
+  --rdp-accent-color: rgb(var(--primary));
+  --rdp-accent-background-color: rgb(var(--primary) / 0.15);
+  --rdp-today-color: rgb(var(--primary));
+  /* largura "auto": as colunas se distribuem pela largura real do container
+     (ver .rdp-root .rdp-month_grid abaixo) em vez de um valor fixo que estoura. */
+  --rdp-day-width: auto;
+  --rdp-day-height: 38px;
+  --rdp-day_button-width: auto;
+  --rdp-day_button-height: 36px;
+  --rdp-day_button-border-radius: 9px;
+  --rdp-selected-border: none;
+  --rdp-disabled-opacity: 0.3;
+  --rdp-nav_button-width: 28px;
+  --rdp-nav_button-height: 28px;
+  --rdp-nav-height: 34px;
+  width: 100%;
+  margin: 0;
+  font-size: 13px;
+  color: rgb(var(--foreground));
+}
 
+/* FLUIDO POR CONSTRUÇÃO: a lib deixa .rdp-months com `max-width: fit-content` e a
+   tabela com largura intrínseca, então o calendário ficava MAIS LARGO que a caixa
+   que o contém (transbordava e cortava a seta da direita). Prendendo a cadeia
+   inteira em 100% + table-fixed, ele cabe em qualquer largura — 320px ou 1440px. */
+.rdp-root .rdp-months,
+.rdp-root .rdp-month {
+  max-width: none;
+  width: 100%;
+}
+.rdp-root .rdp-month_grid {
+  width: 100%;
+  table-layout: fixed;
+}
+.rdp-root .rdp-day {
+  width: auto;
+}
+.rdp-root .rdp-day_button {
+  width: 100%;
+  max-width: 100%;
+  color: rgb(var(--foreground));
+  border-radius: var(--rdp-day_button-border-radius);
+}
+.rdp-root .rdp-day_button:hover {
+  background-color: rgb(var(--card-muted));
+}
+.rdp-root .rdp-day_button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(var(--primary) / 0.4);
+}
+
+/* Cabeçalho (mês/ano). A lib manda `font-size: large; font-weight: bold` e trava a
+   altura em --rdp-nav-height, então o "julho 2026" saía maior que o resto da UI
+   (14px) e corria por baixo das setas, que são `position: absolute` à direita.
+   O padding reserva o espaço da navegação. */
+.rdp-root .rdp-month_caption {
+  height: auto;
+  min-height: var(--rdp-nav-height);
+  align-items: center;
+  padding-inline-end: 68px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgb(var(--foreground));
+  text-transform: capitalize;
+}
+.rdp-root .rdp-caption_label,
+.rdp-root .rdp-dropdown {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Setas. Sem o prefixo .rdp-root a regra empata com a da lib — que entra depois
+   (o style.css é importado de um componente) e vence, deixando-as azul puro e 24px. */
+.rdp-root .rdp-chevron {
+  fill: rgb(var(--muted));
+  width: 16px;
+  height: 16px;
+}
+.rdp-root .rdp-dropdown_root .rdp-chevron {
+  width: 13px;
+  height: 13px;
+}
+.rdp-root .rdp-button_previous:hover .rdp-chevron,
+.rdp-root .rdp-button_next:hover .rdp-chevron {
+  fill: rgb(var(--foreground));
+}
+
+.rdp-root .rdp-weekday {
+  color: rgb(var(--faint));
+  font-weight: 500;
+  font-size: 11px;
+}
+.rdp-root .rdp-today:not(.rdp-selected) .rdp-day_button {
+  color: rgb(var(--primary));
+  font-weight: 700;
+}
+.rdp-root .rdp-outside {
+  opacity: 0.45;
+}
+
+/* mode="single": a lib só engrossa/aumenta a fonte do dia selecionado (o número
+   "pula" de tamanho). O escopo .rdp-single é OBRIGATÓRIO — em mode="range" o
+   modificador `selected` marca TODOS os dias do intervalo. */
+.rdp-single .rdp-selected {
+  font-size: inherit;
+}
+.rdp-single .rdp-selected .rdp-day_button {
+  background-color: rgb(var(--primary));
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Modo toque (celular): só sobe as alturas pra alvo de 44px — a largura já é
+   fluida acima. */
+.rdp-touch.rdp-touch {
+  --rdp-day-height: 46px;
+  --rdp-day_button-height: 44px;
+  --rdp-nav_button-width: 36px;
+  --rdp-nav_button-height: 36px;
+  --rdp-nav-height: 40px;
 }
 
 @layer utilities {
@@ -166,6 +244,11 @@
   .pb-appnav {
     padding-bottom: 5.25rem; /* nav compacta (~68px) + folga, no navegador */
   }
+  /* Rodapé de bottom sheet — mesma regra da bottom nav: a safe-area só entra quando
+     o app está INSTALADO; no navegador ela criaria a faixa vazia embaixo. */
+  .pb-sheet {
+    padding-bottom: 1rem;
+  }
   @media (display-mode: standalone) {
     .bottom-nav-pad {
       padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
@@ -173,6 +256,17 @@
     .pb-appnav {
       padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
     }
+    .pb-sheet {
+      padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+    }
+  }
+
+  /* Altura máxima de bottom sheet. Mesmo motivo do .app-shell-height: no iOS, vh
+     inclui a área atrás da barra do Safari e o topo do painel (título/fechar)
+     escaparia da viewport visível; dvh acompanha o que realmente se vê. */
+  .sheet-max-h {
+    max-height: 88vh;
+    max-height: 88dvh;
   }
 
   /* Thin, themed scrollbars */

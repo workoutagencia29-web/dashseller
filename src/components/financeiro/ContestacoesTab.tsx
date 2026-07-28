@@ -100,7 +100,7 @@ export function ContestacoesTab() {
           </h3>
           <div className="flex flex-wrap items-center gap-2.5">
             <MultiSelect label="Status" options={STATUS_OPTIONS} selected={statusF} onChange={setStatusF} />
-            <DateRangeFilter preset={preset} customRange={customRange} onChange={handleRange} />
+            <DateRangeFilter preset={preset} customRange={customRange} onChange={handleRange} minDate={start} />
             <SearchInput value={search} onChange={setSearch} placeholder="Buscar por ID da contestação ou transação" />
           </div>
         </div>

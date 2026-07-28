@@ -6,7 +6,8 @@ import { cn } from '../../lib/utils'
 import { Badge, Button } from '../settings/primitives'
 import { DateRangeFilter } from '../ui/DateRangeFilter'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import { PRESET_LABELS, type RangePreset, type DateRange } from '../../lib/date'
+import { CustomRangeFields } from '../ui/CustomRangeFields'
+import { PRESET_LABELS, PRESET_ORDER, formatDayMonth, type RangePreset, type DateRange } from '../../lib/date'
 
 /* ------------------------------- Abas -------------------------------- */
 
@@ -511,17 +512,15 @@ export function ExportButtons({ formats, onCsv, onRefresh }: { formats: ('CSV' |
 /** Descreve um filtro de forma declarativa — o desktop renderiza o dropdown
  *  normal; o mobile renderiza os chips dentro do painel "Filtros". */
 export type FilterSpec =
-  | { kind: 'date'; preset: RangePreset; customRange: DateRange | null; onChange: (p: RangePreset, custom?: DateRange) => void }
+  | { kind: 'date'; preset: RangePreset; customRange: DateRange | null; onChange: (p: RangePreset, custom?: DateRange) => void; minDate?: Date }
   | { kind: 'multi'; label: string; options: string[]; selected: string[]; onChange: (v: string[]) => void }
-
-const DATE_PRESETS: RangePreset[] = ['all', 'today', 'yesterday', 'last7', 'last15', 'last30', 'thisMonth']
 
 const isSpecActive = (f: FilterSpec) => (f.kind === 'date' ? f.preset !== 'all' : f.selected.length > 0)
 
 const chipClass = (active: boolean) =>
   cn(
-    'rounded-full border px-3.5 py-2 text-sm font-medium transition-colors',
-    active ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-input/60 text-foreground hover:bg-input',
+    'min-h-11 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors',
+    active ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-input/60 text-foreground active:bg-input',
   )
 
 /**
@@ -554,7 +553,7 @@ export function ReportFilters({
         <div className="flex flex-wrap items-center gap-2.5">
           {filters.map((f, i) =>
             f.kind === 'date' ? (
-              <DateRangeFilter key={i} preset={f.preset} customRange={f.customRange} onChange={f.onChange} />
+              <DateRangeFilter key={i} preset={f.preset} customRange={f.customRange} onChange={f.onChange} minDate={f.minDate} />
             ) : (
               <MultiSelect key={i} label={f.label} options={f.options} selected={f.selected} onChange={f.onChange} />
             ),
@@ -655,17 +654,45 @@ export function MobileFilters({
 }
 
 function FilterGroup({ spec }: { spec: FilterSpec }) {
+  // acordeão do "Personalizado" — inline, pra não empilhar overlay dentro do sheet
+  const [customOpen, setCustomOpen] = useState(spec.kind === 'date' && spec.preset === 'custom')
+
   if (spec.kind === 'date') {
+    const custom = spec.preset === 'custom'
     return (
       <div>
         <p className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-faint">Período</p>
         <div className="flex flex-wrap gap-2">
-          {DATE_PRESETS.map((p) => (
+          {PRESET_ORDER.map((p) => (
             <button key={p} type="button" onClick={() => spec.onChange(p)} className={chipClass(spec.preset === p)}>
               {PRESET_LABELS[p]}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => setCustomOpen((o) => !o)}
+            aria-expanded={customOpen}
+            className={chipClass(custom)}
+          >
+            {custom && spec.customRange
+              ? `${formatDayMonth(spec.customRange.from)} – ${formatDayMonth(spec.customRange.to)}`
+              : 'Personalizado'}
+          </button>
         </div>
+
+        {customOpen && (
+          <div className="mt-3 rounded-2xl border border-border p-3">
+            <CustomRangeFields
+              value={spec.customRange}
+              minDate={spec.minDate}
+              touch
+              onApply={(range) => {
+                spec.onChange('custom', range)
+                setCustomOpen(false)
+              }}
+            />
+          </div>
+        )}
       </div>
     )
   }
@@ -710,8 +737,7 @@ function FilterSheet({ filters, onClear, onClose }: { filters: FilterSpec[]; onC
     <div className="fixed inset-0 z-[80] flex flex-col justify-end lg:hidden" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
       <div
-        className="scrollbar-thin relative z-10 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-border bg-card px-5 pt-3 animate-fade-in"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}
+        className="sheet-max-h scrollbar-thin pb-sheet relative z-10 overflow-y-auto overscroll-contain rounded-t-3xl border-t border-border bg-card px-5 pt-3 animate-fade-in"
       >
         <div className="sticky top-0 z-10 -mx-5 mb-1 bg-card px-5 pb-3">
           <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border" />
@@ -721,7 +747,7 @@ function FilterSheet({ filters, onClear, onClose }: { filters: FilterSpec[]; onC
               type="button"
               onClick={onClose}
               aria-label="Fechar"
-              className="rounded-lg p-1 text-muted transition-colors hover:bg-card-muted hover:text-foreground"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors active:bg-card-muted active:text-foreground"
             >
               <X className="h-5 w-5" />
             </button>

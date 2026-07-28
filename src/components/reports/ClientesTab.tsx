@@ -67,7 +67,7 @@ export function ClientesTab() {
         searchPlaceholder="Buscar nome, CPF ou CNPJ"
         onCsv={exportCsv}
         onRefresh={() => setTick((t) => t + 1)}
-        filters={[{ kind: 'date', preset, customRange, onChange: handleChange }]}
+        filters={[{ kind: 'date', preset, customRange, onChange: handleChange, minDate: start }]}
       />
 
       {/* tabela */}
